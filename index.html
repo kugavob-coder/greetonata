@@ -166,7 +166,7 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 .sum{border-top:1px solid var(--line);padding-top:10px;margin-bottom:14px;font-size:15px}
 .sum div{display:flex;justify-content:space-between;padding:3px 0}
 .sum .total{font-weight:700;font-size:17px;border-top:1px dashed var(--line);margin-top:6px;padding-top:8px}
-#paypal{min-height:48px}
+#paypal-buttons{min-height:48px}
 .sim{display:block;width:100%;border:0;border-radius:24px;background:#ffc439;color:#253b80;font:700 16px 'DM Sans',sans-serif;padding:13px}
 .sim small{display:block;font-weight:500;font-size:11px;color:#3b4f7a}
 
@@ -293,7 +293,7 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
       <div><span>Gift</span><span id="giftAmt">$0.00</span></div>
       <div class="total"><span>Total</span><span id="totalAmt">$2.99</span></div>
     </div>
-    <div id="paypal"></div>
+    <div id="paypal-buttons"></div>
     <p class="err" id="errPay"></p>
   </div>
 </section>
@@ -531,10 +531,10 @@ function updateTotal(){
   document.getElementById('giftNote').textContent=gift?`$${gift} travels inside the envelope — ${to} claims it with PayPal.`:'The gift travels inside the envelope.';
 }
 function cardPayload(){return{gift,card:{occasion:occ,to:val('to'),from:val('from'),text:cardText,mood,style:celestial?'celestial':'classic'}};}
-function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+function loadScript(src,ns){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;if(ns)s.dataset.namespace=ns;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
 async function setupPaypal(){
   if(paypalReady)return;
-  const box=document.getElementById('paypal'),err=document.getElementById('errPay');
+  const box=document.getElementById('paypal-buttons'),err=document.getElementById('errPay');
   if(preview){
     box.innerHTML='<button class="sim">Pay with PayPal<small>Preview: the payment is simulated in this file</small></button>';
     box.querySelector('button').onclick=()=>paid('preview1234');paypalReady=true;return;
@@ -544,10 +544,11 @@ async function setupPaypal(){
     const cfg=await (await fetch('/api/config')).json();
     if(!cfg.paypalClientId)throw new Error(cfg.error||'no client id');
     step='script';
-    await loadScript('https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(cfg.paypalClientId)+'&currency=USD&intent=capture&components=buttons').catch(()=>{throw new Error('the PayPal script was blocked or failed');});
+    await loadScript('https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(cfg.paypalClientId)+'&currency=USD&intent=capture&components=buttons','paypalSdk').catch(()=>{throw new Error('the PayPal script was blocked or failed');});
     step='buttons';
-    if(!window.paypal||!paypal.Buttons)throw new Error('PayPal loaded without buttons');
-    await paypal.Buttons({
+    const sdk=window.paypalSdk;
+    if(!sdk||!sdk.Buttons)throw new Error('PayPal loaded without buttons');
+    await sdk.Buttons({
       style:{shape:'pill',color:'gold',label:'pay',height:46},
       createOrder:async()=>{
         err.textContent='';
@@ -565,7 +566,7 @@ async function setupPaypal(){
       },
       onCancel:()=>{err.textContent='The payment was cancelled. Your card is still here.';},
       onError:()=>{if(!err.textContent)err.textContent='Something went wrong with PayPal. Please try again.';}
-    }).render('#paypal');
+    }).render('#paypal-buttons');
     paypalReady=true;
   }catch(e){
     // temporary diagnostics: which step failed and why
