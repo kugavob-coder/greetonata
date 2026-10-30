@@ -539,9 +539,14 @@ async function setupPaypal(){
     box.innerHTML='<button class="sim">Pay with PayPal<small>Preview: the payment is simulated in this file</small></button>';
     box.querySelector('button').onclick=()=>paid('preview1234');paypalReady=true;return;
   }
+  let step='config';
   try{
     const cfg=await (await fetch('/api/config')).json();
-    await loadScript('https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(cfg.paypalClientId)+'&currency=USD&intent=capture&components=buttons');
+    if(!cfg.paypalClientId)throw new Error(cfg.error||'no client id');
+    step='script';
+    await loadScript('https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(cfg.paypalClientId)+'&currency=USD&intent=capture&components=buttons').catch(()=>{throw new Error('the PayPal script was blocked or failed');});
+    step='buttons';
+    if(!window.paypal||!paypal.Buttons)throw new Error('PayPal loaded without buttons');
     await paypal.Buttons({
       style:{shape:'pill',color:'gold',label:'pay',height:46},
       createOrder:async()=>{
@@ -562,7 +567,12 @@ async function setupPaypal(){
       onError:()=>{if(!err.textContent)err.textContent='Something went wrong with PayPal. Please try again.';}
     }).render('#paypal');
     paypalReady=true;
-  }catch(e){err.textContent='PayPal could not load. Please refresh the page.';}
+  }catch(e){
+    // temporary diagnostics: which step failed and why
+    const why=(e&&e.message)?e.message:String(e);
+    console.log('PayPal setup failed at',step,e);
+    err.textContent='PayPal could not load. Please refresh the page. ('+step+': '+why.slice(0,160)+')';
+  }
 }
 
 /* ================= coda: the private link ================= */
