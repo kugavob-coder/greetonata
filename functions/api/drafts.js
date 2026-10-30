@@ -1,7 +1,23 @@
 // POST /api/drafts — asks Groq for three greeting-card drafts in three tones.
 // The Groq key lives only in Cloudflare (env.GROQ_API_KEY), never in the browser.
 
-const MODEL = 'llama-3.3-70b-versatile';
+// models we prefer, in order; the first one this Groq account can use is chosen
+const PREFERRED = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
+let chosenModel = null;
+async function pickModel(key) {
+  if (chosenModel) return chosenModel;
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/models', { headers: { Authorization: `Bearer ${key}` } });
+    const ids = ((await r.json()).data || []).map(m => m.id);
+    chosenModel = PREFERRED.find(m => ids.includes(m))
+      || ids.find(id => /llama|gpt-oss|qwen|gemma|kimi/i.test(id) && !/whisper|guard|tts|prompt/i.test(id))
+      || null;
+    console.log('Groq model chosen:', chosenModel, '| available:', ids.join(', '));
+  } catch (e) {
+    console.log('Groq model list failed:', String(e));
+  }
+  return chosenModel || PREFERRED[0];
+}
 const TONES = ['Warm', 'Playful', 'Festive'];
 const OCCASIONS = {
   birthday: 'a birthday',
@@ -63,15 +79,18 @@ export async function onRequestPost({ request, env }) {
     round > 1 ? `This is attempt ${round}: use fresh wording, different from earlier attempts.` : '',
   ].filter(Boolean).join('\n');
 
+  const model = await pickModel(env.GROQ_API_KEY);
+  const extra = model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {};
   let res;
   try {
     res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: MODEL,
+        model,
+        ...extra,
         temperature: 0.9,
-        max_tokens: 900,
+        max_tokens: 1500,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: system },
@@ -89,8 +108,9 @@ export async function onRequestPost({ request, env }) {
     let message = raw;
     try { message = JSON.parse(raw).error.message; } catch {}
     message = String(message).replace(/gsk_[A-Za-z0-9]+/g, '[key]').slice(0, 160);
-    console.log('Groq error', res.status, message);
-    return json({ error: 'The AI service returned an error.', detail: `Groq ${res.status}: ${message}` }, 502);
+    console.log('Groq error', res.status, model, message);
+    if (res.status === 404) chosenModel = null;
+    return json({ error: 'The AI service returned an error.', detail: `Groq ${res.status} (${model}): ${message}` }, 502);
   }
 
   let drafts;
