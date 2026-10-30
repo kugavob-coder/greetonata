@@ -807,7 +807,7 @@ async function fetchDrafts(){
   const r=await fetch('/api/drafts',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({occasion:occ,to:val('to'),from:val('from'),relation:val('rel'),details:val('det'),round:used})});
   const data=await r.json().catch(()=>null);
-  if(!r.ok||!data||!Array.isArray(data.drafts))throw Object.assign(new Error(data&&data.error||'failed'),{server:true});
+  if(!r.ok||!data||!Array.isArray(data.drafts))throw Object.assign(new Error((data&&data.detail)||('server '+r.status)),{server:true});
   return data.drafts;
 }
 const ORN=["❦","✧","❀"], WAX=["♡","♪","✳"];
@@ -820,7 +820,7 @@ async function writeDrafts(again){
   try{drafts=await fetchDrafts();}
   catch(e){
     if(location.protocol==='file:'||location.protocol==='content:'||!e.server){drafts=sampleDrafts(val('to'),val('from'),val('rel'));sample=true;}
-    else{used--;btn.disabled=false;btn.textContent=label;errEl.textContent='The drafts could not be written right now. Please try again.';return;}
+    else{used--;btn.disabled=false;btn.textContent=label;errEl.textContent='The drafts could not be written right now. Please try again. ('+e.message+')';return;}
   }
   btn.textContent=label;btn.disabled=false;chk3();
   document.getElementById('testNote').hidden=!sample;

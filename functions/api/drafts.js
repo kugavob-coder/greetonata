@@ -79,17 +79,27 @@ export async function onRequestPost({ request, env }) {
         ],
       }),
     });
-  } catch {
-    return json({ error: 'The AI service could not be reached.' }, 502);
+  } catch (e) {
+    console.log('Groq fetch failed:', String(e));
+    return json({ error: 'The AI service could not be reached.', detail: 'network' }, 502);
   }
-  if (!res.ok) return json({ error: 'The AI service returned an error.' }, 502);
+  if (!res.ok) {
+    // temporary diagnostics: log and return Groq's status and message (never the key)
+    const raw = await res.text().catch(() => '');
+    let message = raw;
+    try { message = JSON.parse(raw).error.message; } catch {}
+    message = String(message).replace(/gsk_[A-Za-z0-9]+/g, '[key]').slice(0, 160);
+    console.log('Groq error', res.status, message);
+    return json({ error: 'The AI service returned an error.', detail: `Groq ${res.status}: ${message}` }, 502);
+  }
 
   let drafts;
   try {
     const data = await res.json();
     drafts = JSON.parse(data.choices[0].message.content).drafts;
-  } catch {
-    return json({ error: 'The AI answer could not be read.' }, 502);
+  } catch (e) {
+    console.log('Groq answer could not be parsed:', String(e));
+    return json({ error: 'The AI answer could not be read.', detail: 'parse' }, 502);
   }
   if (!Array.isArray(drafts) || drafts.length < 3) return json({ error: 'The AI answer was incomplete.' }, 502);
 
