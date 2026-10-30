@@ -148,7 +148,7 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 .corner.tl{top:4px;left:4px}.corner.tr{top:4px;right:4px;transform:scaleX(-1)}
 .corner.bl{bottom:4px;left:4px;transform:scaleY(-1)}.corner.br{bottom:4px;right:4px;transform:scale(-1,-1)}
 .confetti{position:absolute;pointer-events:none}
-#shape{width:100%;max-width:330px;aspect-ratio:1;display:block;margin:0 auto 10px;position:relative}
+#shape{width:100%;max-width:230px;aspect-ratio:1;display:block;margin:-6px auto 6px;position:relative}
 .msg{font:500 20px/1.45 'Cormorant Garamond',serif;color:var(--ink);white-space:pre-wrap;position:relative;text-align:left;padding:0 6px}
 .msg span{transition:opacity .35s,color .6s}
 .msg span.wait{opacity:.12}
@@ -224,7 +224,6 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
   <svg class="flourish" viewBox="0 0 180 16"><path d="M2 9 Q45 0 90 8 T178 7"/></svg>
   <p class="sub">Pick one — each has its own colors and chord.</p>
   <div class="occasions" id="occasions"></div>
-  <button class="primary mt" id="occNext" disabled onclick="go(3)">Continue</button>
 </section>
 
 <!-- III. FOR WHOM -->
@@ -343,11 +342,11 @@ function occArt(shape){
     <path d="M60 84C42 72 30 61 30 45C30 36 36 30 43 30C50 30 55 35 60 43C65 35 70 30 77 30C84 30 90 36 90 45C90 61 78 72 60 84Z" fill="#f2c983"/>
     <circle cx="60" cy="54" r="7" fill="#c88745"/></svg>`;
 }
-const occBox=document.getElementById('occasions');
+const occBox=document.getElementById('occasions');let occTimer=0;
 Object.entries(OCC).forEach(([k,o])=>{
   const b=document.createElement('button');b.className='occ';
   b.innerHTML=`<div class="art ${o.art}">${occArt(o.shape)}</div><strong>${o.name}</strong><small>${o.cap}</small>`;
-  b.onclick=()=>{occ=k;occBox.querySelectorAll('.occ').forEach(x=>x.classList.toggle('sel',x===b));applyColors();chord(o.chord);document.getElementById('occNext').disabled=false;resetDrafts();};
+  b.onclick=()=>{if(occ!==k)resetDrafts();occ=k;occBox.querySelectorAll('.occ').forEach(x=>x.classList.toggle('sel',x===b));applyColors();chord(o.chord);clearTimeout(occTimer);occTimer=setTimeout(()=>go(3),600);};
   occBox.appendChild(b);
 });
 
@@ -488,7 +487,7 @@ async function play(){
   const btn=document.getElementById('play'),err=document.getElementById('err5');err.textContent='';
   btn.disabled=true;btn.textContent='Loading piano…';
   try{await loadPiano();}catch(e){btn.disabled=false;btn.textContent='▶ Play the card';err.textContent='The piano could not load. Please try again.';return;}
-  btn.disabled=false;btn.textContent='■ Stop';
+  btn.disabled=false;btn.textContent='■ Stop';cardToTop(cardEl);
   const song=compose(cardText),t0=actx.currentTime+.25,srcs=[];
   for(const n of[...song.notes,...song.bass,...song.fin])srcs.push(key(n.midi,t0+n.t,n.dur,soundOn?n.vol:0));
   playing={srcs};
@@ -499,7 +498,7 @@ async function play(){
     const el=actx.currentTime-t0;
     paint(scene.ctx,scene.els,clamp(el/song.total),null);
     for(const n of wordNotes){const s=spans[n.word];if(!s)continue;
-      if(el>=n.t){if(s.classList.contains('wait'))emitEdge(fx,mood==='warm'?1:2);s.classList.remove('wait');s.classList.toggle('now',el<n.t+.45);}}
+      if(el>=n.t){if(s.classList.contains('wait')){emitEdge(fx,mood==='warm'?1:2);followWord(s);}s.classList.remove('wait');s.classList.toggle('now',el<n.t+.45);}}
     if(el<song.total+.6)raf=requestAnimationFrame(tick);
     else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));btn.textContent='▶ Play again';}
   };
@@ -569,10 +568,8 @@ async function setupPaypal(){
     }).render('#paypal-buttons');
     paypalReady=true;
   }catch(e){
-    // temporary diagnostics: which step failed and why
-    const why=(e&&e.message)?e.message:String(e);
     console.log('PayPal setup failed at',step,e);
-    err.textContent='PayPal could not load. Please refresh the page. ('+step+': '+why.slice(0,160)+')';
+    err.textContent='PayPal could not load. Please refresh the page.';
   }
 }
 

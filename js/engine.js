@@ -476,6 +476,14 @@ function fillMessage(el,text,waiting){
   return spans;
 }
 
+/* keeps the word that is playing in view: the page glides down by itself */
+function followWord(span){
+  const r=span.getBoundingClientRect(),h=window.innerHeight;
+  if(r.bottom>h*.82)window.scrollBy({top:r.top-h*.55,behavior:'smooth'});
+}
+/* brings the top of the card to the top of the screen */
+function cardToTop(el){const y=el.getBoundingClientRect().top+window.scrollY-12;window.scrollTo({top:Math.max(0,y),behavior:'smooth'});}
+
 /* ================= sparkles along the edges ================= */
 const GOLD=['#d4a94e','#e9c46a','#f0d99b'];
 function makeFx(canvas){return{cv:canvas,parts:[],on:false,w:0,h:0,dpr:1};}
