@@ -29,5 +29,13 @@ export async function onRequestGet({ request, env, params }) {
     .on('meta[property="og:title"]', set(title))
     .on('meta[property="og:description"]', set(desc))
     .on('meta[property="og:image"]', set(image))
+    // the right seal colour and greeting from the first paint, before the page script loads the card
+    .on('body', {
+      element: el => {
+        el.setAttribute('data-occ', occ);
+        if (card.style === 'celestial') el.setAttribute('class', 'celestial');
+      },
+    })
+    .on('#hello', { element: el => el.setInnerContent(`A card for <b>${safe(card.to)}</b>`, { html: true }) })
     .transform(page);
 }

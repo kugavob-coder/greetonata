@@ -822,10 +822,10 @@
         opacity: 0.12;
       }
       .msg span.now {
-        color: var(--accent);
+        color: var(--accent-ink, var(--accent));
       }
       .msg span.key {
-        color: var(--accent);
+        color: var(--accent-ink, var(--accent));
         font-weight: 600;
       }
       .fx {
@@ -1599,6 +1599,7 @@
         normT(scene.els);
         cv.setAttribute('aria-label', describeShape(scene, nameCase(val('to'))));
         document.body.style.setProperty('--accent', scene.accent);
+        document.body.style.setProperty('--accent-ink', readableInk(scene.accent, celestial ? '#1c2342' : '#fffaf1'));
         spans = fillMessage(msgEl, cardText, false);
         wish = makeWish();
         paintCard(scene, 1, wish, nowS());

@@ -144,3 +144,30 @@ test('helpers: names and AI layer', () => {
     energy: 3, // missing or out of range: the middle
   });
 });
+
+test('card link: preview tags, and the right seal colour and name before the page script runs', async () => {
+  const { onRequestGet: cardLink } = await fn('c/[id].js');
+  // a tiny stand-in for Cloudflare's HTMLRewriter that records what each selector would get
+  const seen = {};
+  globalThis.HTMLRewriter = class {
+    on(sel, h) {
+      const el = {
+        setAttribute: (k, v) => ((seen[sel] ??= {})[k] = v),
+        setInnerContent: v => ((seen[sel] ??= {}).html = v),
+      };
+      h.element(el);
+      return this;
+    }
+    transform(r) {
+      return r;
+    }
+  };
+  const env = { CARDS: memoryKV(), ASSETS: { fetch: async () => new Response('<html></html>') } };
+  await env.CARDS.put('card:abc123', JSON.stringify({ occasion: 'xmas', style: 'celestial', to: 'Mel<b>', from: 'Bo' }));
+  await cardLink({ request: new Request('https://greetonata.test/c/abc123'), params: { id: 'abc123' }, env });
+  assert.equal(seen.body['data-occ'], 'xmas');
+  assert.equal(seen.body.class, 'celestial');
+  assert.equal(seen['#hello'].html, 'A card for <b>Melb</b>', 'names cannot carry HTML');
+  assert.equal(seen['meta[property="og:image"]'].content, 'https://greetonata.test/og/xmas.jpg');
+  delete globalThis.HTMLRewriter;
+});

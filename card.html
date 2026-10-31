@@ -38,6 +38,35 @@
         --env-line: #c9a77a;
         --seal: #9e2b25;
         --seal-hi: #c4463d;
+        --seal-lo: #5e1612;
+      }
+      /* colours of each occasion; the server marks the page with data-occ before it is sent,
+         so the right seal is there from the first moment */
+      body[data-occ='celebration'] {
+        --accent-soft: #f1d3dc;
+        --seal: #8a2f5c;
+        --seal-hi: #b4507f;
+        --seal-lo: #4c1631;
+      }
+      body[data-occ='xmas'] {
+        --accent-soft: #d8e6cf;
+        --seal: #1f4f3a;
+        --seal-hi: #357a5a;
+        --seal-lo: #0f2b1f;
+      }
+      body[data-occ='thanks'] {
+        --accent-soft: #f5dcc0;
+        --seal: #9a5a1c;
+        --seal-hi: #c27a33;
+        --seal-lo: #56300c;
+      }
+      body.celestial,
+      body.celestial[data-occ] {
+        --accent-soft: #2f365c;
+      }
+      /* until we know which card it is, the envelope waits out of sight */
+      body:not([data-occ]) .env {
+        opacity: 0;
       }
       body.celestial {
         --bg: #141a31;
@@ -259,7 +288,7 @@
         position: absolute;
         inset: 0;
         border-radius: 47% 53% 50% 50%/52% 48% 52% 48%;
-        background: radial-gradient(circle at 35% 30%, var(--seal-hi), var(--seal) 60%, #5e1612);
+        background: radial-gradient(circle at 35% 30%, var(--seal-hi), var(--seal) 60%, var(--seal-lo));
         box-shadow:
           0 4px 8px #0005,
           inset 0 -3px 6px #0004,
@@ -428,10 +457,10 @@
         opacity: 0.12;
       }
       .msg span.now {
-        color: var(--accent);
+        color: var(--accent-ink, var(--accent));
       }
       .msg span.key {
-        color: var(--accent);
+        color: var(--accent-ink, var(--accent));
         font-weight: 600;
       }
       .primary {
@@ -772,16 +801,8 @@
         normT(scene.els);
         document.getElementById('shape').setAttribute('aria-label', describeShape(scene, cardData.to));
         document.body.style.setProperty('--accent', scene.accent);
-        const SOFT = { birthday: '#f2d5c5', celebration: '#f1d3dc', xmas: '#d8e6cf', thanks: '#f5dcc0' }[occ];
-        document.body.style.setProperty('--accent-soft', celestial ? '#2f365c' : SOFT);
-        const SEAL = {
-          birthday: ['#9e2b25', '#c4463d'],
-          celebration: ['#8a2f5c', '#b4507f'],
-          xmas: ['#1f4f3a', '#357a5a'],
-          thanks: ['#9a5a1c', '#c27a33'],
-        }[occ];
-        document.body.style.setProperty('--seal', SEAL[0]);
-        document.body.style.setProperty('--seal-hi', SEAL[1]);
+        document.body.style.setProperty('--accent-ink', readableInk(scene.accent, celestial ? '#1c2342' : '#fffaf1'));
+        document.body.dataset.occ = occ; // seal and soft colours come from the CSS for this occasion
         const hello = document.getElementById('hello');
         hello.innerHTML = '';
         hello.append('A card for ', Object.assign(document.createElement('b'), { textContent: cardData.to }));

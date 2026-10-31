@@ -7,6 +7,27 @@ const REDUCED_MOTION = typeof matchMedia === 'function' ? matchMedia('(prefers-r
 const calm = () => !!(REDUCED_MOTION && REDUCED_MOTION.matches);
 const glide = () => (calm() ? 'auto' : 'smooth');
 
+/* the accent as a text colour: same hue, but dark (or light) enough to read on the card paper */
+function readableInk(color, paper) {
+  const rgb = c => {
+    const x = document.createElement('canvas').getContext('2d');
+    x.fillStyle = c;
+    const h = x.fillStyle.slice(1);
+    return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255);
+  };
+  const lum = c => {
+    const [r, g, b] = c.map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
+  const bg = rgb(paper),
+    darkPaper = lum(bg) < 0.3;
+  let c = rgb(color);
+  for (let i = 0; i < 40 && contrast(c, bg) < 4.5; i++)
+    c = c.map(v => (darkPaper ? v + (1 - v) * 0.08 : v * 0.92));
+  return '#' + c.map(v => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
+}
+
 /* ================= drawing a card shape ================= */
 const clamp = v => (v < 0 ? 0 : v > 1 ? 1 : v);
 function normT(els) {
