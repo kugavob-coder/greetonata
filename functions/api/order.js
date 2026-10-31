@@ -1,6 +1,6 @@
 // POST /api/order — creates a PayPal (sandbox) order for the card and the optional gift,
 // and keeps the card waiting in KV until the payment is captured.
-import { PAYPAL_API, CARD_PRICE, GIFTS, OCCASIONS, MOODS, json, paypalToken, money, nameCase } from './_paypal.js';
+import { PAYPAL_API, CARD_PRICE, GIFTS, OCCASIONS, MOODS, json, paypalToken, money, nameCase, cleanCardAI } from './_paypal.js';
 
 const clean = (v, max) => String(v ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').replace(/\r/g, '').trim().slice(0, max);
 
@@ -21,6 +21,7 @@ export async function onRequestPost({ request, env }) {
     gift: GIFTS.includes(Number(body.gift)) ? Number(body.gift) : 0,
   };
   if (!card.occasion || !card.to || !card.from || !card.text) return json({ error: 'The card is incomplete.' }, 400);
+  card.ai = cleanCardAI(c.ai, card.text);
 
   const total = CARD_PRICE + card.gift;
   const items = [{ name: 'Greetonata card', quantity: '1', unit_amount: { currency_code: 'USD', value: money(CARD_PRICE) } }];

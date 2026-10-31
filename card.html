@@ -83,6 +83,7 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 .msg span{transition:opacity .35s,color .6s}
 .msg span.wait{opacity:.12}
 .msg span.now{color:var(--accent)}
+.msg span.key{color:var(--accent);font-weight:600}
 .primary{display:none;width:100%;border:1px solid var(--gold);background:linear-gradient(135deg,#bd8b43,#e0bd75);color:var(--btn);padding:15px;border-radius:30px;font:700 16px 'DM Sans',sans-serif;box-shadow:0 4px 0 #9b6e31;cursor:pointer;margin-top:20px}
 .primary.show{display:block}
 [hidden]{display:none!important}
@@ -176,7 +177,7 @@ async function loadCard(){
     if(window.PREVIEW_CARD)cardData=window.PREVIEW_CARD;
     else{const r=await fetch('/api/card/'+encodeURIComponent(id||''));if(!r.ok)throw 0;cardData=await r.json();}
   }catch(e){document.getElementById('stage').hidden=true;document.getElementById('missing').hidden=false;return;}
-  occ=cardData.occasion;mood=cardData.mood;celestial=cardData.style==='celestial';cardText=cardData.text;
+  occ=cardData.occasion;mood=cardData.mood;celestial=cardData.style==='celestial';cardText=cardData.text;AI=cardData.ai||null;
   document.body.classList.toggle('celestial',celestial);
   document.title=`A card for ${cardData.to} — Greetonata`;
   setupEnvelope();
@@ -244,14 +245,13 @@ async function play(){
   const song=compose(cardText),t0=actx.currentTime+.2,srcs=[];
   for(const n of[...song.notes,...song.bass,...song.fin])srcs.push(key(n.midi,t0+n.t,n.dur,n.vol));
   playing={srcs};
-  spans.forEach(s=>{s.classList.add('wait');s.classList.remove('now');});
-  const wordNotes=song.notes.filter(n=>n.word!==undefined);
+  spans.forEach(s=>{s.classList.add('wait');s.classList.remove('now','key');});
   const tick=()=>{
     if(!playing)return;
     const el=actx.currentTime-t0;
     paint(scene.ctx,scene.els,clamp(el/song.total),null);
-    for(const n of wordNotes){const s=spans[n.word];if(!s)continue;
-      if(el>=n.t){if(s.classList.contains('wait')){emitEdge(FXC,mood==='warm'?1:2);followWord(s);}s.classList.remove('wait');s.classList.toggle('now',el<n.t+.45);}}
+    for(const w of song.words){const s=spans[w.word];if(!s)continue;
+      if(el>=w.t){if(s.classList.contains('wait')){emitEdge(FXC,w.key?5:(mood==='warm'?1:2));if(w.key)s.classList.add('key');followWord(s);}s.classList.remove('wait');s.classList.toggle('now',el<w.t+.45);}}
     if(el<song.total+.6)raf=requestAnimationFrame(tick);
     else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));document.getElementById('again').classList.add('show');showGift();}
   };

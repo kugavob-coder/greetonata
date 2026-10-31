@@ -27,6 +27,17 @@ export async function paypalToken(env) {
 
 export const money = n => n.toFixed(2);
 
+// the AI layer saved with a card: key words, two colours, energy 1–5
+export function cleanCardAI(ai, text) {
+  const words = new Set((String(text).toLowerCase().match(/[a-z0-9']+/g) || []));
+  const a = ai && typeof ai === 'object' ? ai : {};
+  const keywords = (Array.isArray(a.keywords) ? a.keywords : []).map(k => String(k).toLowerCase().replace(/[^a-z0-9' ]/g, '').trim())
+    .filter(k => k && k.length <= 24 && k.split(' ').every(w => words.has(w))).slice(0, 4);
+  const palette = (Array.isArray(a.palette) ? a.palette : []).map(String).filter(c => /^#[0-9a-f]{6}$/i.test(c)).slice(0, 2);
+  const energy = Math.max(1, Math.min(5, Math.round(Number(a.energy) || 3)));
+  return { keywords, palette, energy };
+}
+
 // "fiona" → "Fiona" (only lowercase first letters change)
 export const nameCase = s => s.replace(/(^|[\s\-'.])(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
 

@@ -34,7 +34,7 @@ export async function onRequestPost({ request, env }) {
     const id = newId();
     const card = {
       occasion: pending.occasion, to: pending.to, from: pending.from, text: pending.text,
-      mood: pending.mood, style: pending.style, gift: pending.gift,
+      mood: pending.mood, style: pending.style, gift: pending.gift, ai: pending.ai || null,
       paid: pending.total, orderId, captureId: capture.id, created: new Date().toISOString(),
     };
     await env.CARDS.put(`card:${id}`, JSON.stringify(card));
