@@ -63,11 +63,8 @@ h2{font:500 38px/1.02 'Cormorant Garamond',serif;text-align:center}
 .glow{position:absolute;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,#e9c98266,transparent 68%);animation:pulse 4s ease-in-out infinite}
 @keyframes pulse{50%{transform:scale(1.13);opacity:.65}}
 .orbit{position:absolute;width:290px;height:170px;border:1px solid var(--gold2);border-radius:50%;transform:rotate(-24deg);opacity:.8}
-.rosette{width:218px;height:218px;position:relative;animation:float 5s ease-in-out infinite}
-@keyframes float{50%{transform:translateY(-7px) rotate(3deg)}}
-.petal{position:absolute;width:76px;height:110px;left:71px;top:4px;transform-origin:38px 105px;border:1.4px solid var(--gold);border-radius:55% 55% 45% 45%;background:linear-gradient(145deg,#fff4d9cc,var(--accent-soft));box-shadow:inset 0 0 14px #fff9;transition:background .5s}
-body.celestial .petal{background:linear-gradient(145deg,#f0d99b,var(--accent-soft));box-shadow:inset 0 0 18px #f6d98d55}
-.rosette .center{position:absolute;left:87px;top:87px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff2bd,var(--gold2) 65%,var(--gold));box-shadow:0 0 0 5px #f6e3b880,0 0 20px #d9b66d88}
+.hero-cv{width:240px;height:240px;position:relative;transition:opacity .6s}
+.hero-cv.fade{opacity:0}
 .note{position:absolute;color:var(--gold);font:28px 'Cormorant Garamond',serif;animation:noteFloat 4s ease-in-out infinite}
 .n1{left:10%;top:22%}.n2{right:9%;top:34%;animation-delay:1s}.n3{left:20%;bottom:14%;animation-delay:2s}.n4{right:18%;bottom:12%;animation-delay:.6s}
 @keyframes noteFloat{50%{transform:translateY(-12px) rotate(8deg)}}
@@ -173,6 +170,11 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 /* the link */
 .linkbox{display:flex;gap:8px;margin-top:22px}
 .linkbox input{flex:1;font-size:14px}
+.receipt{border:1px dashed var(--line);border-radius:12px;padding:10px 14px;margin-top:16px;font-size:14px;color:var(--muted)}
+.receipt b{display:block;color:var(--ink);font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.receipt div{display:flex;justify-content:space-between;padding:2px 0}
+.receipt .tot{color:var(--ink);font-weight:700;border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
+.receipt small{display:block;margin-top:6px;word-break:break-all}
 .done-note{font:italic 18px/1.4 'Cormorant Garamond',serif;color:var(--muted);text-align:center;margin-top:12px}
 .seal-mini{display:block;width:110px;height:110px;margin:20px auto 4px}
 </style>
@@ -192,7 +194,7 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
   </div>
 </header>
 
-<div class="steps" id="steps"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+<div class="steps" id="steps"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
 
 <!-- I. OVERTURE -->
 <section class="screen on" id="s1">
@@ -201,13 +203,7 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
   <p class="intro">Your words become a flower and a melody — made for one person only.</p>
   <div class="hero-art">
     <div class="glow"></div><div class="orbit"></div>
-    <div class="rosette" aria-hidden="true">
-      <i class="petal" style="transform:rotate(0deg)"></i><i class="petal" style="transform:rotate(45deg)"></i>
-      <i class="petal" style="transform:rotate(90deg)"></i><i class="petal" style="transform:rotate(135deg)"></i>
-      <i class="petal" style="transform:rotate(180deg)"></i><i class="petal" style="transform:rotate(225deg)"></i>
-      <i class="petal" style="transform:rotate(270deg)"></i><i class="petal" style="transform:rotate(315deg)"></i>
-      <i class="center"></i>
-    </div>
+    <canvas class="hero-cv" id="heroCv" aria-hidden="true"></canvas>
     <span class="note n1">♪</span><span class="note n2">♫</span><span class="note n3">✧</span><span class="note n4">♪</span>
   </div>
   <button class="primary" onclick="go(2)">Create a card</button>
@@ -297,12 +293,13 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
   </div>
 </section>
 
-<!-- CODA: the private link -->
+<!-- VI. SEND: the private link -->
 <section class="screen" id="s6">
-  <div class="kicker">Coda</div>
+  <div class="kicker">VI · Send</div>
   <h2>Your card is <em>ready</em></h2>
   <canvas class="seal-mini" id="sealMini"></canvas>
   <p class="done-note" id="doneNote"></p>
+  <div class="receipt" id="receipt"></div>
   <div class="linkbox"><input id="link" readonly onclick="this.select()"></div>
   <button class="primary mt" id="copyBtn" onclick="copyLink()">Copy link</button>
   <button class="secondary mt-s" id="shareBtn" onclick="shareLink()">Share</button>
@@ -313,6 +310,29 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 <script>
 /* ================= state ================= */
 let occ=null, celestial=false, soundOn=true, mood='warm', cardText='', scene=null;
+
+/* ================= home: a card shape drawing itself ================= */
+const HERO=[
+  ['birthday','warm',"Dear Ana,\n\nHappy birthday! I hope this year brings you as much joy as you bring to everyone around you.\n\nWith love,\nMarko"],
+  ['xmas','warm',"Dear Grandpa Joe,\n\nMay your cookies stay soft and your lights stay untangled. Happy holidays!\n\nYours,\nLily"],
+  ['thanks','warm',"Dear Mrs. Novak,\n\nThank you for the patience and the kind words when I needed them most.\n\nWith gratitude,\nLuka"],
+  ['celebration','festive',"Dear Mila and Petar,\n\nCongratulations on your wedding! Here is to a lifetime of music together.\n\nCheers,\nJana"]];
+const heroCv=document.getElementById('heroCv');let heroIdx=0,heroEls=null,heroT0=0;
+function heroShape(){
+  const keep=[occ,mood,scene];const[o,m,t]=HERO[heroIdx%HERO.length];occ=o;mood=m;scene=null;
+  const sh=chooseShape(t);heroEls=normT(sh.els);occ=keep[0];mood=keep[1];scene=keep[2];
+}
+function heroFrame(now){
+  if(document.getElementById('s1').classList.contains('on')){
+    if(!heroEls){sizeCanvas(heroCv,240);heroShape();heroT0=now;heroCv.classList.remove('fade');}
+    const el=(now-heroT0)/1000;
+    paint(heroCv.getContext('2d'),heroEls,clamp(el/3.2),null);
+    if(el>5.6&&!heroCv.classList.contains('fade'))heroCv.classList.add('fade');
+    if(el>6.3){heroIdx++;heroEls=null;}
+  }
+  requestAnimationFrame(heroFrame);
+}
+requestAnimationFrame(heroFrame);
 
 /* ================= occasions (screen II) ================= */
 const OCC={
@@ -361,7 +381,7 @@ function setStyle(c){
   celestial=c;document.body.classList.toggle('celestial',c);
   document.getElementById('stClassic').classList.toggle('on',!c);
   document.getElementById('stCelestial').classList.toggle('on',c);
-  applyColors();ping(c?783.99:587.33,.3);
+  applyColors();ping(c?783.99:587.33,.3);heroEls=null;
   if(document.getElementById('s5').classList.contains('on'))renderCard();
 }
 
@@ -388,12 +408,15 @@ function go(n){
   if(n!==5)stopCard(false);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById('s'+n).classList.add('on');
-  document.querySelectorAll('#steps i').forEach((d,i)=>d.classList.toggle('on',i===Math.min(n,5)-1));
+  document.querySelectorAll('#steps i').forEach((d,i)=>d.classList.toggle('on',i===n-1));
   if(n<5)applyColors();
   if(n<6)ping([392,523.25,587.33,659.25,783.99][n-1],.3);
   scrollTo(0,0);
 }
 const val=id=>document.getElementById(id).value.trim();
+/* "fiona" → "Fiona", "mrs. novak" → "Mrs. Novak" (only lowercase first letters change) */
+const nameCase=s=>s.replace(/(^|[\s\-'.])(\p{Ll})/gu,(m,a,b)=>a+b.toUpperCase());
+['to','from'].forEach(id=>document.getElementById(id).addEventListener('blur',e=>{e.target.value=nameCase(e.target.value.trim());}));
 function chk3(){document.getElementById('writeBtn').disabled=!(val('to')&&val('from'))}
 function chk4(){document.getElementById('makeBtn').disabled=!val('edit')}
 
@@ -428,6 +451,7 @@ async function fetchDrafts(){
 const ORN=["❦","✧","❀"], WAX=["♡","♪","✳"];
 async function writeDrafts(again){
   if(used>=ROUNDS)return;
+  ['to','from'].forEach(id=>{const el=document.getElementById(id);el.value=nameCase(el.value.trim());});
   const btn=document.getElementById(again?'againBtn':'writeBtn'),errEl=document.getElementById(again?'err4':'err3'),label=btn.textContent;
   btn.disabled=true;btn.textContent='Writing…';errEl.textContent='';
   used++;
@@ -536,7 +560,7 @@ async function setupPaypal(){
   const box=document.getElementById('paypal-buttons'),err=document.getElementById('errPay');
   if(preview){
     box.innerHTML='<button class="sim">Pay with PayPal<small>Preview: the payment is simulated in this file</small></button>';
-    box.querySelector('button').onclick=()=>paid('preview1234');paypalReady=true;return;
+    box.querySelector('button').onclick=()=>paid('preview1234',{paid:(PRICE+gift).toFixed(2),transaction:'PREVIEW-0000'});paypalReady=true;return;
   }
   let step='config';
   try{
@@ -561,7 +585,7 @@ async function setupPaypal(){
         const d=await r.json().catch(()=>({}));
         if(d.declined)return actions.restart();
         if(!r.ok||!d.id){err.textContent=d.error||'The payment could not be completed.';return;}
-        paid(d.id);
+        paid(d.id,d);
       },
       onCancel:()=>{err.textContent='The payment was cancelled. Your card is still here.';},
       onError:()=>{if(!err.textContent)err.textContent='Something went wrong with PayPal. Please try again.';}
@@ -573,14 +597,20 @@ async function setupPaypal(){
   }
 }
 
-/* ================= coda: the private link ================= */
+/* ================= VI · send: the private link ================= */
 let cardLink='';
-function paid(id){
+function paid(id,pay){
   cardLink=location.origin.replace(/^(file|content):.*/,'https://greetonata.pages.dev')+'/c/'+id;
   stopCard(true);
   const to=val('to');
   document.getElementById('link').value=cardLink;
   document.getElementById('doneNote').textContent=`Send this private link to ${to}. Only people who have it can open the card`+(gift?` — and the $${gift} gift waits inside the envelope.`:'.');
+  const rc=document.getElementById('receipt');rc.innerHTML='';
+  const row=(a,b,cls)=>{const d=document.createElement('div');if(cls)d.className=cls;d.append(Object.assign(document.createElement('span'),{textContent:a}),Object.assign(document.createElement('span'),{textContent:b}));rc.appendChild(d);};
+  rc.appendChild(Object.assign(document.createElement('b'),{textContent:'Paid with PayPal (sandbox)'}));
+  row('Card','$'+PRICE.toFixed(2));if(gift)row('Gift for '+to,'$'+gift.toFixed(2));
+  row('Total','$'+((pay&&pay.paid)||(PRICE+gift).toFixed(2)),'tot');
+  if(pay&&pay.transaction)rc.appendChild(Object.assign(document.createElement('small'),{textContent:'Transaction ID: '+pay.transaction}));
   go(6);
   const m=document.getElementById('sealMini');sizeCanvas(m,110);paint(m.getContext('2d'),scene.els,1,null);
   chord([523.25,659.25,783.99,1046.5]);

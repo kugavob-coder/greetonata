@@ -39,7 +39,7 @@ export async function onRequestPost({ request, env }) {
     };
     await env.CARDS.put(`card:${id}`, JSON.stringify(card));
     await env.CARDS.delete(`pending:${orderId}`);
-    return json({ id });
+    return json({ id, paid: pending.total, transaction: capture.id });
   } catch (e) {
     console.log('PayPal capture error', String(e));
     return json({ error: 'The payment could not be completed.' }, 502);

@@ -27,6 +27,9 @@ export async function paypalToken(env) {
 
 export const money = n => n.toFixed(2);
 
+// "fiona" → "Fiona" (only lowercase first letters change)
+export const nameCase = s => s.replace(/(^|[\s\-'.])(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
+
 // random, hard to guess id for the private link
 export function newId(length = 10) {
   const abc = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';

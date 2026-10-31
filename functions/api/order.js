@@ -1,6 +1,6 @@
 // POST /api/order — creates a PayPal (sandbox) order for the card and the optional gift,
 // and keeps the card waiting in KV until the payment is captured.
-import { PAYPAL_API, CARD_PRICE, GIFTS, OCCASIONS, MOODS, json, paypalToken, money } from './_paypal.js';
+import { PAYPAL_API, CARD_PRICE, GIFTS, OCCASIONS, MOODS, json, paypalToken, money, nameCase } from './_paypal.js';
 
 const clean = (v, max) => String(v ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').replace(/\r/g, '').trim().slice(0, max);
 
@@ -13,8 +13,8 @@ export async function onRequestPost({ request, env }) {
   const c = body.card || {};
   const card = {
     occasion: OCCASIONS.includes(c.occasion) ? c.occasion : null,
-    to: clean(c.to, 40),
-    from: clean(c.from, 40),
+    to: nameCase(clean(c.to, 40)),
+    from: nameCase(clean(c.from, 40)),
     text: clean(c.text, 1200),
     mood: MOODS.includes(c.mood) ? c.mood : 'warm',
     style: c.style === 'celestial' ? 'celestial' : 'classic',

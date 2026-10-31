@@ -85,6 +85,18 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 .msg span.now{color:var(--accent)}
 .primary{display:none;width:100%;border:1px solid var(--gold);background:linear-gradient(135deg,#bd8b43,#e0bd75);color:var(--btn);padding:15px;border-radius:30px;font:700 16px 'DM Sans',sans-serif;box-shadow:0 4px 0 #9b6e31;cursor:pointer;margin-top:20px}
 .primary.show{display:block}
+[hidden]{display:none!important}
+/* the gift inside the envelope */
+.gift{margin-top:20px;background:var(--surface);border:1.5px solid var(--gold);border-radius:16px;padding:18px 18px 16px;text-align:center;box-shadow:0 10px 26px #674c2920;animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.gift svg{width:64px;height:64px;display:block;margin:0 auto 6px}
+.gift h3{font:600 28px 'Cormorant Garamond',serif;color:var(--ink)}
+.gift p{font:italic 17px 'Cormorant Garamond',serif;color:var(--muted);margin-top:2px}
+.gift label{display:block;text-align:left;font:italic 17px 'Cormorant Garamond',serif;color:var(--muted);margin:14px 0 4px}
+.gift input{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--ink);font:16px 'DM Sans',sans-serif;outline:none}
+.gift input:focus{border-color:var(--gold)}
+.gift .hint{font:13px 'DM Sans',sans-serif;font-style:normal;margin-top:8px}
+.gift .msg2{font:15px 'DM Sans',sans-serif;font-style:normal;color:var(--accent);margin-top:10px;min-height:20px}
+.gift .ok{color:var(--gold);font-weight:600}
 .primary:active{transform:translateY(3px);box-shadow:0 1px 0 #9b6e31}
 .demo{background:var(--accent-soft);color:var(--ink);text-align:center;font-size:13px;padding:6px 12px;border-bottom:1px solid var(--line)}
 .missing{font:italic 22px 'Cormorant Garamond',serif;color:var(--muted);text-align:center;margin-top:80px}
@@ -129,6 +141,22 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
       <div class="msg" id="msg"></div>
     </div>
     <button class="primary" id="again">▶ Play again</button>
+    <div class="gift" id="gift" hidden>
+      <svg viewBox="0 0 64 64" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round">
+        <rect x="10" y="26" width="44" height="30" rx="3" fill="var(--accent-soft)"/><rect x="7" y="18" width="50" height="10" rx="3" fill="var(--accent-soft)"/>
+        <path d="M32 18v38"/><path d="M32 18c-4-10-16-12-15-4 1 6 15 4 15 4zM32 18c4-10 16-12 15-4-1 6-15 4-15 4z" fill="var(--accent-soft)"/>
+      </svg>
+      <h3 id="giftTitle"></h3>
+      <p id="giftFrom"></p>
+      <button class="primary show" id="claimBtn">Claim your gift</button>
+      <div id="claimForm" hidden>
+        <label for="claimEmail">Your PayPal email</label>
+        <input type="email" id="claimEmail" autocomplete="email" placeholder="you@example.com">
+        <button class="primary show" id="sendGift">Send it to my PayPal</button>
+        <p class="hint">Demo: use the email of a PayPal sandbox account.</p>
+      </div>
+      <p class="msg2" id="giftMsg"></p>
+    </div>
   </div>
   <p class="missing" id="missing" hidden>This card could not be found.</p>
   <a class="make" href="/">Make your own card</a>
@@ -225,7 +253,7 @@ async function play(){
     for(const n of wordNotes){const s=spans[n.word];if(!s)continue;
       if(el>=n.t){if(s.classList.contains('wait')){emitEdge(FXC,mood==='warm'?1:2);followWord(s);}s.classList.remove('wait');s.classList.toggle('now',el<n.t+.45);}}
     if(el<song.total+.6)raf=requestAnimationFrame(tick);
-    else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));document.getElementById('again').classList.add('show');}
+    else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));document.getElementById('again').classList.add('show');showGift();}
   };
   raf=requestAnimationFrame(tick);
 }
@@ -242,6 +270,45 @@ function fxLoop(now){
   requestAnimationFrame(fxLoop);
 }
 requestAnimationFrame(fxLoop);
+
+/* ================= the gift ================= */
+let giftShown=false;
+function showGift(){
+  if(giftShown||!cardData.gift)return;giftShown=true;
+  const box=document.getElementById('gift');
+  document.getElementById('giftTitle').textContent=`A $${cardData.gift} gift for you`;
+  document.getElementById('giftFrom').textContent=cardData.giftClaimed?'This gift has already been claimed.':`from ${cardData.from}, tucked inside the envelope`;
+  document.getElementById('claimBtn').hidden=!!cardData.giftClaimed;
+  box.hidden=false;
+  for(let i=0;i<6;i++)setTimeout(()=>emitEdge(FXC,2),i*120);
+  setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'center'}),300);
+}
+document.getElementById('claimBtn').onclick=()=>{
+  document.getElementById('claimBtn').hidden=true;document.getElementById('claimForm').hidden=false;
+  document.getElementById('claimEmail').focus();
+};
+document.getElementById('sendGift').onclick=async()=>{
+  const btn=document.getElementById('sendGift'),msg=document.getElementById('giftMsg'),email=document.getElementById('claimEmail').value.trim();
+  msg.className='msg2';msg.textContent='';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent='Please enter a valid email address.';return;}
+  btn.disabled=true;btn.textContent='Sending…';
+  let ok=false,text='';
+  if(window.PREVIEW_CARD){ok=true;}
+  else{
+    const id=(location.pathname.match(/\/c\/([A-Za-z0-9]+)/)||[])[1]||new URLSearchParams(location.search).get('id');
+    try{const r=await fetch('/api/claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,email})});
+      const d=await r.json().catch(()=>({}));ok=r.ok&&d.ok;text=d.error||'';}
+    catch(e){text='The gift could not be sent right now. Please try again.';}
+  }
+  if(ok){
+    document.getElementById('claimForm').hidden=true;
+    msg.className='msg2 ok';msg.textContent=`Your $${cardData.gift} is on its way to your PayPal.`;
+    for(let i=0;i<10;i++)setTimeout(()=>emitEdge(FXC,2),i*90);
+  }else{
+    btn.disabled=false;btn.textContent='Send it to my PayPal';
+    msg.textContent=text||'The gift could not be sent right now. Please try again.';
+  }
+};
 
 seal.onclick=openEnvelope;
 document.getElementById('again').onclick=play;
