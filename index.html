@@ -322,7 +322,7 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 /* ================= state ================= */
 Desk.setNotes({
   s1:['I · Overture','<p>Greetonata turns a message into a one-of-a-kind card: <b>a flower drawn from its words</b> and <b>a melody composed from it</b>.</p>'],
-  s2:['II · The Occasion','<p>Each occasion has its own family of shapes: nine kinds of flowers, seven kinds of real snow crystals and a growing heart, each with its own colours.</p>'],
+  s2:['II · The Occasion','<p>Each occasion has its own family of shapes: a birthday cake with its own candles, nine kinds of flowers, seven kinds of real snow crystals and six kinds of hearts, each with its own colours.</p>'],
   s3:['III · For Whom','<p><b>AI</b> (Llama 3.3 on Groq) writes three drafts in three tones. Your details are used only for that request.</p>'],
   s4:['IV · The Words','<p>With each draft the AI also picks <b>the key words</b>, <b>two colours</b> and <b>an energy level</b>. You can edit the text freely.</p>'],
   s5:['V · The Card','<p>The tune begins with <b>the recipient\'s name</b> and ends with <b>yours</b>: every letter becomes a note. Key words get longer notes and glow.</p><p>Payment uses <b>PayPal Checkout</b> (Orders API). The optional gift goes into the envelope.</p>'],
@@ -337,16 +337,17 @@ const HERO=[
   ['xmas','warm',"Dear Grandpa Joe,\n\nMay your cookies stay soft and your lights stay untangled. Happy holidays!\n\nYours,\nLily"],
   ['thanks','warm',"Dear Mrs. Novak,\n\nThank you for the patience and the kind words when I needed them most.\n\nWith gratitude,\nLuka"],
   ['celebration','festive',"Dear Mila and Petar,\n\nCongratulations on your wedding! Here is to a lifetime of music together.\n\nCheers,\nJana"]];
-const heroCv=document.getElementById('heroCv');let heroIdx=0,heroEls=null,heroT0=0;
+const heroCv=document.getElementById('heroCv');let heroIdx=0,heroEls=null,heroFlames=null,heroT0=0;
 function heroShape(){
   const keep=[occ,mood,scene,AI];const[o,m,t]=HERO[heroIdx%HERO.length];occ=o;mood=m;scene=null;AI=null;
-  const sh=chooseShape(t);heroEls=normT(sh.els);occ=keep[0];mood=keep[1];scene=keep[2];AI=keep[3];
+  const sh=chooseShape(t);heroEls=normT(sh.els);heroFlames=sh.flames||null;occ=keep[0];mood=keep[1];scene=keep[2];AI=keep[3];
 }
 function heroFrame(now){
   if(document.getElementById('s1').classList.contains('on')){
     if(!heroEls){sizeCanvas(heroCv,heroCv.clientWidth||240);heroShape();heroT0=now;heroCv.classList.remove('fade');}
     const el=(now-heroT0)/1000;
-    paint(heroCv.getContext('2d'),heroEls,clamp(el/3.2),null);
+    const hc=heroCv.getContext('2d');paint(hc,heroEls,clamp(el/3.2),null);
+    if(heroFlames&&el>3.2)drawFlames(hc,heroFlames,now/1000,Math.min(1,(el-3.2)/.3),0);
     if(el>5.6&&!heroCv.classList.contains('fade'))heroCv.classList.add('fade');
     if(el>6.3){heroIdx++;heroEls=null;}
   }
@@ -356,7 +357,7 @@ requestAnimationFrame(heroFrame);
 
 /* ================= occasions (screen II) ================= */
 const OCC={
-  birthday:   {name:"Birthday",            cap:"Make their day shine",   shape:"flower", art:"a-birthday",
+  birthday:   {name:"Birthday",            cap:"Make their day shine",   shape:"cake",   art:"a-birthday",
                classic:["#d97861","#f2d5c5"], celestial:["#e89a85","#70506c"], chord:[523.25,659.25,783.99]},
   celebration:{name:"Celebration",         cap:"Weddings, babies & more",shape:"flower2",art:"a-celebration",
                classic:["#c7708f","#f1d3dc"], celestial:["#e3a0bd","#6a4a6e"], chord:[587.33,739.99,880]},
@@ -367,10 +368,13 @@ const OCC={
 };
 function occArt(shape){
   const s='stroke="#a66f39" stroke-width="1.5"';
-  if(shape==="flower") return `<svg viewBox="0 0 120 120" fill="none" ${s}>
-    <path d="M60 60C38 47 41 20 58 29C78 17 85 44 60 60Z" fill="#e88b70"/><path d="M60 60C73 35 100 40 90 59C101 80 75 85 60 60Z" fill="#f1b86b"/>
-    <path d="M60 60C85 72 79 99 60 90C41 101 35 75 60 60Z" fill="#df795f"/><path d="M60 60C47 85 20 80 29 60C19 40 45 35 60 60Z" fill="#f4c887"/>
-    <circle cx="60" cy="60" r="10" fill="#d9aa4c"/></svg>`;
+  if(shape==="cake") return `<svg viewBox="0 0 120 120" fill="none" ${s} stroke-linejoin="round">
+    <ellipse cx="60" cy="96" rx="44" ry="7" fill="#f6e6d4"/>
+    <path d="M22 70v22c0 4 17 7 38 7s38-3 38-7V70" fill="#ec9c8a"/><ellipse cx="60" cy="70" rx="38" ry="7" fill="#fbe3d2"/>
+    <path d="M22 72c4 6 8 6 10 0s7 7 10 0 7 7 10 0 7 7 10 0 7 7 10 0 7 7 10 0" fill="none"/>
+    <path d="M36 50v18c0 3 11 5 24 5s24-2 24-5V50" fill="#f4c887"/><ellipse cx="60" cy="50" rx="24" ry="5" fill="#fff1d6"/>
+    <path d="M60 45V31" stroke-width="5" stroke="#e88b70"/><path d="M60 31v-4" stroke="#5a4030"/>
+    <path d="M60 27c4-4 3-9 0-13-3 4-4 9 0 13z" fill="#ffc94a" stroke="#e8902a"/></svg>`;
   if(shape==="flower2") return `<svg viewBox="0 0 120 120" fill="none" ${s}>
     <path d="M60 60C39 48 43 22 60 30C77 18 84 45 60 60Z" fill="#e8a7a4"/><path d="M60 60C72 36 99 41 90 60C99 78 74 84 60 60Z" fill="#d7a3c7"/>
     <path d="M60 60C84 73 78 98 60 90C42 98 36 74 60 60Z" fill="#efc77d"/><path d="M60 60C47 84 21 78 30 60C20 42 45 36 60 60Z" fill="#e9b2a1"/>
@@ -507,15 +511,16 @@ async function writeDrafts(again){
 /* ================= the card (screen V) ================= */
 const cv=document.getElementById('shape'),msgEl=document.getElementById('msg'),cardEl=document.getElementById('card');
 const fx=makeFx(document.getElementById('fx'));
-let spans=[],playing=null,raf=0;
+let spans=[],playing=null,raf=0,wish=makeWish();
+const nowS=()=>performance.now()/1000;
 function renderCard(){
   stopCard(false);
   cardEl.className='cardx '+mood;
   sizeCanvas(cv,cv.clientWidth||300);
   scene={ctx:cv.getContext('2d'),...chooseShape(cardText)};normT(scene.els);
   document.body.style.setProperty('--accent',scene.accent);
-  spans=fillMessage(msgEl,cardText,false);
-  paint(scene.ctx,scene.els,1,null);
+  spans=fillMessage(msgEl,cardText,false);wish=makeWish();
+  paintCard(scene,1,wish,nowS());
   sizeFx(fx);fx.parts=[];fx.on=true;
 }
 function makeCard(){
@@ -528,7 +533,7 @@ function stopCard(redraw){
   cancelAnimationFrame(raf);
   spans.forEach(s=>s.classList.remove('wait','now'));
   document.getElementById('play').textContent='▶ Play the card';
-  if(redraw&&scene)paint(scene.ctx,scene.els,1,null);
+  if(redraw&&scene)paintCard(scene,1,wish,nowS());
 }
 async function play(){
   if(playing){stopCard(true);return;}
@@ -539,15 +544,16 @@ async function play(){
   const song=compose(cardText),t0=actx.currentTime+.25,srcs=[];
   for(const n of[...song.notes,...song.bass,...song.fin])srcs.push(key(n.midi,t0+n.t,n.dur,soundOn?n.vol:0));
   playing={srcs};Desk.score(song,()=>actx.currentTime-t0);
-  spans.forEach(s=>{s.classList.add('wait');s.classList.remove('key');});
+  spans.forEach(s=>{s.classList.add('wait');s.classList.remove('key');});wish=makeWish();
   const tick=()=>{
     if(!playing)return;
-    const el=actx.currentTime-t0;
-    paint(scene.ctx,scene.els,clamp(el/song.total),null);
+    const el=actx.currentTime-t0,p=clamp(el/song.total);
+    wish.lit=p>=.97?Math.min(1,(p-.97)/.03):0;
+    paintCard(scene,p,wish,nowS());
     for(const w of song.words){const s=spans[w.word];if(!s)continue;
       if(el>=w.t){if(s.classList.contains('wait')){emitEdge(fx,w.key?5:(mood==='warm'?1:2));if(w.key)s.classList.add('key');followWord(s);}s.classList.remove('wait');s.classList.toggle('now',el<w.t+.45);}}
     if(el<song.total+.6)raf=requestAnimationFrame(tick);
-    else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));btn.textContent='▶ Play again';}
+    else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));btn.textContent='▶ Play again';if(scene.flames)wish.lit=1;}
   };
   raf=requestAnimationFrame(tick);
 }
@@ -556,13 +562,16 @@ let fxLast=0,idleAcc=0;
 function fxLoop(now){
   const dt=Math.min(.05,(now-(fxLast||now))/1000);fxLast=now;
   if(fx.on&&document.getElementById('s5').classList.contains('on')){
-    if(!playing){idleAcc+=dt*IDLE_RATE[mood];while(idleAcc>=1){emitEdge(fx,1);idleAcc--;}}
+    if(!playing){idleAcc+=dt*IDLE_RATE[mood];while(idleAcc>=1){emitEdge(fx,1);idleAcc--;}
+      if(scene&&scene.flames&&(wish.lit||(wish.blownAt>=0&&nowS()-wish.blownAt<3)))paintCard(scene,1,wish,nowS());}
     fxStep(fx,dt);
   }
   requestAnimationFrame(fxLoop);
 }
 requestAnimationFrame(fxLoop);
 window.addEventListener('resize',()=>{if(fx.on)sizeFx(fx);});
+/* tap the candles to blow them out */
+cv.addEventListener('click',()=>{if(blowCandles(wish,nowS())){for(let i=0;i<12;i++)setTimeout(()=>emitEdge(fx,2),i*70);chord([523.25,659.25,783.99,1046.5]);}});
 
 /* ================= gift & PayPal (sandbox) ================= */
 const PRICE=2.99;let gift=0,paypalReady=false;

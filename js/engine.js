@@ -347,6 +347,221 @@ function buildHeart(f,R,c){
   blossom(els,S.x,S.y,.07,-Math.PI/2,.26,c);
   return els;}
 
+/* ================= BIRTHDAY CAKE ================= */
+const CAKE_COLORS=[
+  {name:'strawberry',body:[345,62,80],cream:[345,55,93],accent:[350,72,52],candle:[345,70,60]},
+  {name:'vanilla',   body:[40,62,84], cream:[42,60,95], accent:[12,72,58], candle:[200,60,60]},
+  {name:'chocolate', body:[22,38,40], cream:[32,45,82], accent:[350,72,55],candle:[45,85,58]},
+  {name:'mint',      body:[150,38,78],cream:[150,32,93],accent:[340,68,62],candle:[340,65,62]},
+  {name:'lemon',     body:[50,82,76], cream:[52,70,93], accent:[200,62,55],candle:[200,60,58]},
+  {name:'lavender',  body:[268,38,80],cream:[270,35,93],accent:[45,85,55], candle:[45,85,55]}];
+function cakeCol(v){const o={};for(const k in v)if(k!=='name')o[k]=tone(v[k]);
+  o.line=celestial?[o.body[0],45,80]:[o.body[0],Math.min(45,o.body[1]),Math.max(22,Math.min(38,o.body[2]-40))];
+  if(mood==='festive')o.line=celestial?[44,85,74]:[38,70,36];
+  return o;}
+/* a number in the message: digits ("30", "21st") or words ("thirty", "twenty-one") */
+const NUMW={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100};
+function cakeNumber(text){
+  const body=text.split('\n').slice(1,-1).join(' ').toLowerCase();
+  const d=body.match(/\b(\d{1,3})(?:st|nd|rd|th)?\b/);if(d){const n=+d[1];if(n>0&&n<=120)return n;}
+  const w=body.match(/\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)[\s-]+(one|two|three|four|five|six|seven|eight|nine)\b/);
+  if(w)return NUMW[w[1]]+NUMW[w[2]];
+  const s=body.match(/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\b(?=[\s-]*(years?|today|th|birthday|candles|!|\.|,|$))/);
+  if(s)return NUMW[s[1]];
+  return 0;
+}
+function buildCake(f,R,c,text){
+  const els=[],flames=[];
+  const tiers=1+Math.min(2,Math.floor(f.sentences/2)+(R()<.3?1:0));
+  const styles=['smooth','drip','scallop','stripes','dots','ruffle'];
+  const plateY=.9;
+  // plate
+  const plate=[];for(let i=0;i<=40;i++){const a=i/40*TAU;plate.push(P(.94*Math.cos(a),plateY+.11*Math.sin(a)));}
+  els.push(F_(plate,0,.06,hsl([c.cream[0],12,celestial?40:94])));els.push(L_(plate,0,.08,hsl(c.line,.7),1.2));
+  let yB=plateY,w=tiers===1?1.36:tiers===2?1.46:1.5;
+  const tierH=tiers===1?.66:tiers===2?.5:.4;
+  let topInfo=null;
+  for(let k=0;k<tiers;k++){
+    const h=tierH*(1-k*.08),yT=yB-h,ry=w*.13,t0=.06+k*.2,t1=t0+.2;
+    const style=styles[(code(f,k*11+3)+k)%styles.length];
+    // body (front side) and the top surface
+    const body=[P(-w/2,yT),P(-w/2,yB)];
+    for(let i=0;i<=24;i++){const a=Math.PI-i/24*Math.PI;body.push(P(w/2*Math.cos(a),yB+ry*Math.sin(a)));}
+    body.push(P(w/2,yT));
+    for(let i=0;i<=24;i++){const a=i/24*Math.PI;body.push(P(w/2*Math.cos(a),yT+ry*Math.sin(a)));}
+    els.push(F_(body,t0+.03,t1,null,{lin:[yT,yB],stops:[[0,hsl([c.body[0],c.body[1],Math.min(97,c.body[2]+6)])],[1,hsl([c.body[0],c.body[1],c.body[2]-8])]]}));
+    els.push(L_(body,t0,t1,hsl(c.line),1.5));
+    const top=[];for(let i=0;i<=40;i++){const a=i/40*TAU;top.push(P(w/2*Math.cos(a),yT+ry*Math.sin(a)));}
+    els.push(F_(top,t1-.04,t1+.02,hsl(c.cream)));els.push(L_(top,t1-.06,t1+.02,hsl(c.line),1.2));
+    const front=x=>yT+ry*Math.sqrt(Math.max(0,1-(2*x/w)**2));   // y of the top front edge
+    const frontB=x=>yB+ry*Math.sqrt(Math.max(0,1-(2*x/w)**2));
+    const d0=t1,d1=t1+.12;
+    if(style==='drip'){
+      const n=6+code(f,k*5)%5,band=[];
+      for(let i=0;i<=60;i++){const x=-w/2+i/60*w;band.push(P(x,front(x)));}
+      const low=[];for(let i=60;i>=0;i--){const x=-w/2+i/60*w;let dy=.035;
+        for(let j=0;j<n;j++){const xj=-w/2+(j+.5)/n*w,L=(.06+.12*((code(f,j*7+k)%5)/4))*h/.4;dy+=L*Math.exp(-(((x-xj)/(w*.035))**2));}
+        low.push(P(x,front(x)+dy));}
+      const pts=band.concat(low);
+      els.push(F_(pts,d0,d1,hsl(c.cream)));els.push(L_(low,d0,d1,hsl(c.line,.8),1.1));
+    }else if(style==='scallop'){
+      const n=9+code(f,k*3)%5;
+      for(let j=0;j<n;j++){const xa=-w/2+j/n*w,xb=xa+w/n,arc=[];
+        for(let i=0;i<=10;i++){const x=xa+(xb-xa)*i/10;arc.push(P(x,frontB(x)-.05*Math.sin(i/10*Math.PI)));}
+        els.push(L_(arc,d0+j/n*.1,d0+j/n*.1+.05,hsl(c.cream),2.6));els.push(L_(arc,d0+j/n*.1,d0+j/n*.1+.05,hsl(c.line,.6),.8));
+        const xm=(xa+xb)/2;els.push(D_(xm,front(xm)+.012,.018,d0+j/n*.1,d0+j/n*.1+.06,hsl(c.cream)));}
+    }else if(style==='stripes'){
+      const n=7+code(f,k*9)%5;
+      for(let j=0;j<n;j++){const x=-w/2+(j+.5)/n*w,dw=w/n*.18,q=[];
+        q.push(P(x-dw,front(x-dw)),P(x-dw,frontB(x-dw)),P(x+dw,frontB(x+dw)),P(x+dw,front(x+dw)));
+        els.push(F_(q,d0+j/n*.08,d0+j/n*.08+.05,hsl(c.accent,.55)));}
+    }else if(style==='dots'){
+      const cols=5+code(f,k)%3,rows=2;
+      for(let r=0;r<rows;r++)for(let j=0;j<cols;j++){const x=-w/2+(j+.5+(r%2)*.5)/cols*w;if(x>w/2-.04)continue;
+        const y=front(x)+(r+1)*(h/(rows+1));els.push(D_(x,y,.022,d0+(r*cols+j)*.006,d0+(r*cols+j)*.006+.05,hsl(r%2?c.cream:c.accent)));}
+    }else if(style==='ruffle'){
+      for(let r=1;r<=2;r++){const pts=[];for(let i=0;i<=60;i++){const x=-w/2+i/60*w;pts.push(P(x,front(x)+r*h/3+.018*Math.sin(i*1.3)));}
+        els.push(L_(pts,d0+r*.03,d1,hsl(c.cream),3.2));els.push(L_(pts,d0+r*.03,d1,hsl(c.line,.5),.8));}
+    }
+    topInfo={yT,w,ry,t:d1};
+    yB=yT+ry*.2;w*=.72;
+  }
+  // decorations on the top tier
+  const {yT,w:tw,ry}=topInfo,decoT=Math.min(.82,topInfo.t+.02);
+  const deco=['berries','strawberries','flowers','stars','sprinkles'][code(f,17)%5];
+  const spots=[];const nd=5+code(f,23)%4;
+  for(let j=0;j<nd;j++){const a=Math.PI*(.12+.76*j/(nd-1));spots.push(P(-tw/2*.86*Math.cos(a),yT+ry*.86*Math.sin(a)));}
+  spots.forEach((p,j)=>{const t0=decoT+j*.012;
+    if(deco==='berries'){for(const[dx,dy]of[[0,0],[.025,-.015],[-.022,-.012]])els.push(D_(p.x+dx,p.y+dy-.02,.022,t0,t0+.05,hsl(j%2?[300,40,38]:[350,70,45])));}
+    else if(deco==='strawberries'){const s=.05,b=[];for(let i=0;i<=16;i++){const a=i/16*TAU;b.push(P(p.x+s*.8*Math.sin(a),p.y-.03-s*(.55*Math.cos(a)-.3*Math.cos(2*a)*.4)));}
+      els.push(F_(b,t0,t0+.05,hsl([355,75,52])));els.push(D_(p.x,p.y-.075,.012,t0+.03,t0+.06,hsl([110,45,40])));}
+    else if(deco==='flowers'){for(let i=0;i<5;i++){const a=i*TAU/5;els.push(D_(p.x+.022*Math.cos(a),p.y-.025+.022*Math.sin(a),.016,t0,t0+.05,hsl(c.accent)));}
+      els.push(D_(p.x,p.y-.025,.012,t0+.02,t0+.06,hsl([45,90,62])));}
+    else if(deco==='stars'){const s=[];for(let i=0;i<=10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?.016:.04;s.push(P(p.x+r*Math.cos(a),p.y-.03+r*Math.sin(a)));}
+      els.push(F_(s,t0,t0+.05,hsl([45,90,60])));}
+    else{for(let i=0;i<4;i++){const a=R()*Math.PI,x=p.x+(R()-.5)*.08,y=p.y-.02+(R()-.5)*.03;
+      els.push(L_([P(x-.014*Math.cos(a),y-.014*Math.sin(a)),P(x+.014*Math.cos(a),y+.014*Math.sin(a))],t0,t0+.04,hsl([[350,70,60],[200,60,55],[50,85,55],[140,45,50]][i]),2.2));}}
+  });
+  // candles: the number from the message, or a little group
+  const num=cakeNumber(text||''),cT=.86;
+  if(num){
+    const digits=String(num).split(''),size=digits.length>2?.38:.54,gap=size*.62,x0=-(digits.length-1)*gap/2;
+    digits.forEach((dg,i)=>{const x=x0+i*gap,y=yT-size*.12;
+      els.push({k:'text',x,y,size,txt:dg,col:hsl(c.candle),stroke:hsl(c.line),t0:cT+i*.03,t1:cT+i*.03+.06});
+      els.push(L_([P(x,y-size*.7),P(x,y-size*.8)],cT+.08,cT+.1,hsl([30,20,25]),1.4));
+      flames.push({x,y:y-size*.8,s:.06});});
+  }else{
+    const n=3+code(f,31)%5;
+    for(let i=0;i<n;i++){const a=Math.PI*(.15+.7*i/Math.max(1,n-1)),x=-tw/2*.62*Math.cos(a),yb=yT+ry*.5*Math.sin(a)-.01,hgt=.26+.05*(i%2),cw=.026;
+      const body=[P(x-cw,yb),P(x-cw,yb-hgt),P(x+cw,yb-hgt),P(x+cw,yb)];
+      els.push(F_(body,cT+i*.012,cT+i*.012+.04,hsl(celestial?[0,0,85]:[0,0,99])));
+      for(let s=0;s<4;s++){const y1=yb-hgt*(s+.2)/4;els.push(L_([P(x-cw,y1),P(x+cw,y1-hgt*.12)],cT+i*.012+.02,cT+i*.012+.05,hsl(c.candle),1.8));}
+      els.push(L_(body.concat([body[0]]),cT+i*.012,cT+i*.012+.04,hsl(c.line,.6),.9));
+      els.push(L_([P(x,yb-hgt),P(x,yb-hgt-.03)],cT+.06,cT+.08,hsl([30,20,25]),1.2));
+      flames.push({x,y:yb-hgt-.03,s:.045});}
+  }
+  return{els,flames};
+}
+/* flames that flicker; blown = how far they have gone out (0..1) */
+function drawFlames(ctx,flames,time,alpha,blown){
+  if(!flames||!flames.length||alpha<=0)return;
+  const S=ctx.canvas.width,c=S/2,u=S*.47;
+  flames.forEach((fl,i)=>{
+    const x=c+fl.x*u,y=c+fl.y*u,s=fl.s*u*(1-blown),fl2=Math.sin(time*13+i*2.1)*.12+Math.sin(time*7.3+i)*.08;
+    if(s<=.5)return;
+    ctx.save();ctx.globalAlpha=alpha*(1-blown);
+    const g=ctx.createRadialGradient(x,y-s*.4,0,x,y-s*.4,s*2.6);g.addColorStop(0,'rgba(255,214,120,.55)');g.addColorStop(1,'rgba(255,190,90,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y-s*.4,s*2.6,0,TAU);ctx.fill();
+    ctx.translate(x,y);ctx.rotate(fl2*.25);ctx.scale(1,1+fl2);
+    const gr=ctx.createLinearGradient(0,0,0,-s*1.6);gr.addColorStop(0,'#ff8a2a');gr.addColorStop(.5,'#ffc94a');gr.addColorStop(1,'#fff3c4');
+    ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(s*.7,-s*.2,s*.45,-s*1.1,0,-s*1.7);ctx.bezierCurveTo(-s*.45,-s*1.1,-s*.7,-s*.2,0,0);ctx.fill();
+    ctx.restore();
+  });
+}
+/* little curls of smoke after the candles are blown out */
+function drawSmoke(ctx,flames,since){
+  if(since<0||since>2.6)return;
+  const S=ctx.canvas.width,c=S/2,u=S*.47;
+  flames.forEach((fl,i)=>{for(let k=0;k<5;k++){const t=since-k*.14;if(t<0)continue;
+    const x=c+fl.x*u+Math.sin(t*3+i+k)*u*.03,y=c+fl.y*u-t*u*.16,r=u*(.01+t*.018);
+    ctx.globalAlpha=Math.max(0,.35*(1-t/2.4));ctx.fillStyle=celestial?'#c9c3d6':'#a99b8a';ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();}});
+  ctx.globalAlpha=1;
+}
+
+/* ================= HEARTS — six kinds, the message picks one ================= */
+const HEART_KINDS=['garden','lace','petals','hearts','glass','ribbon'];
+const HEART_NAMES={garden:'Garden heart',lace:'Lace heart',petals:'Heart of petals',hearts:'Heart of hearts',glass:'Stained-glass heart',ribbon:'Ribbon heart'};
+/* point on the heart outline (t 0..2π), k = scale toward the middle */
+const HC=P(0,.04);
+function heartAt(t,k=1){
+  const x=16*Math.sin(t)**3,y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
+  const s=.0575;return P(HC.x+(x*s)*k,HC.y+(y*s+.1)*k);
+}
+function heartPath(k=1,n=160){const o=[];for(let i=0;i<=n;i++)o.push(heartAt(i/n*TAU,k));return o;}
+function miniHeart(cx,cy,r,rot=0){const o=[];for(let i=0;i<=24;i++){const t=i/24*TAU,x=16*Math.sin(t)**3/17,y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/17;
+  const ca=Math.cos(rot),sa=Math.sin(rot);o.push(P(cx+r*(x*ca-y*sa),cy+r*(x*sa+y*ca)));}return o;}
+function buildHeartKind(kind,f,R,c){
+  const els=[],H=heartPath(1);
+  if(kind==='garden')return buildHeart(f,R,c);
+  if(kind==='lace'){
+    els.push(L_(H,0,.25,hsl(c.outline),2.2));
+    const loops=22+code(f,5)%14;
+    for(let j=0;j<loops;j++){const t=(j+.5)/loops*TAU,p=heartAt(t,1),q=heartAt(t,.9),m=P((p.x+q.x)/2,(p.y+q.y)/2);
+      const r=.045+.02*((code(f,j)%3)/2);els.push(L_(circle(r,18,m.x,m.y),.15+j/loops*.35,.2+j/loops*.35,hsl(c.outline,.95),1.6));els.push(D_(p.x,p.y,.012,.2+j/loops*.35,.25+j/loops*.35,hsl(c.bloom)));}
+    for(const k of[.74,.54]){els.push(L_(heartPath(k),.45+(1-k)*.3,.65+(1-k)*.3,hsl(c.outline,.75),1.4,{dash:true}));}
+    const rings=[.62,.38];rings.forEach((k,ri)=>{const n=14-ri*5;for(let j=0;j<n;j++){const p=heartAt((j+.5)/n*TAU,k);els.push(D_(p.x,p.y,.013,.6+ri*.1+j*.006,.66+ri*.1+j*.006,hsl(c.bloom)));}});
+    blossom(els,HC.x,HC.y+.1,.09,-Math.PI/2,.82,c);
+    return els;
+  }
+  if(kind==='petals'){
+    const pts=[],step=.13-.025*((code(f,7)%3)/2);
+    for(let y=.92;y>-.72;y-=step*.8)for(let x=-.95;x<=.95;x+=step){const q=P(x+(Math.round(y/step)%2)*step/2+(R()-.5)*.02,y);if(inside(q,heartPath(.94,80)))pts.push(q);}
+    const cols=[c.bloom,c.bloomIn,c.leaf];
+    pts.forEach((p,i)=>{const a=Math.atan2(p.y-HC.y,p.x-HC.x)+(R()-.5)*.6,L=step*1.15,t0=.08+.7*(1-(p.y+.72)/1.64);
+      const pts2=petal(P(p.x-Math.cos(a)*L*.5,p.y-Math.sin(a)*L*.5),a,0,L,L*.42,{k:.8,n:10});
+      els.push(F_(pts2,t0,t0+.06,hsl(cols[(code(f,i)+i)%3],.85)));els.push(L_(pts2,t0,t0+.06,hsl(c.outline,.6),.8));});
+    els.push(L_(H,.85,1,hsl(c.outline),2));
+    return els;
+  }
+  if(kind==='hearts'){
+    els.push(L_(H,0,.2,hsl(c.outline,.6),1.2,{dash:true}));
+    const step=.15-.03*((code(f,9)%3)/2),cols=[c.bloom,c.outline,c.bloomIn],cells=[],HP=heartPath(.92,80);
+    for(let y=-.8;y<.95;y+=step*.86)for(let x=-.98;x<=.98;x+=step){const q=P(x+(Math.round((y+.8)/(step*.86))%2)*step/2+(R()-.5)*.03,y+(R()-.5)*.03);if(inside(q,HP))cells.push(q);}
+    cells.sort((a,b)=>b.y-a.y);const N=cells.length;
+    for(let k=0;k<N;k++){const p=cells[k],r=Math.hypot(p.x-HC.x,p.y-HC.y);
+      const s=step*(.62+.25*((code(f,k)%3)/2)),t0=.1+.75*k/N;
+      const mh=miniHeart(p.x,p.y,s,(R()-.5)*.6);els.push(F_(mh,t0,t0+.05,hsl(cols[k%3],.9)));els.push(L_(mh,t0,t0+.05,hsl(c.outline,.5),.7));}
+    return els;
+  }
+  if(kind==='glass'){
+    const rings=[1,.72,.44,.2],segs=8+code(f,13)%5,t0s=[];
+    const hueBase=c.bloom[0],cells=[];
+    for(let r=0;r<rings.length-1;r++)for(let j=0;j<segs;j++){
+      const ta=j/segs*TAU,tb=(j+1)/segs*TAU,poly=[];
+      for(let i=0;i<=8;i++)poly.push(heartAt(ta+(tb-ta)*i/8,rings[r]));
+      for(let i=8;i>=0;i--)poly.push(heartAt(ta+(tb-ta)*i/8,rings[r+1]));
+      const h=(hueBase+[-18,0,14,28,-30][(code(f,r*segs+j))%5]+360)%360;
+      cells.push({poly,col:[h,Math.min(68,c.bloom[1]),celestial?52:[76,82,70][(r+j)%3]],t:.1+r*.22+j/segs*.15});}
+    const core=heartPath(.2,40);cells.push({poly:core,col:c.bloomIn,t:.75});
+    for(const cl of cells){els.push(F_(cl.poly,cl.t,cl.t+.08,hsl(cl.col,.85)));els.push(L_(cl.poly,cl.t,cl.t+.08,hsl([30,20,celestial?80:22],.9),1.6));}
+    els.push(L_(H,.85,1,hsl([30,20,celestial?80:22]),3));
+    return els;
+  }
+  // ribbon: a wide band traced around the heart, finished with a bow
+  const wR=.08+.04*((code(f,19)%3)/2),outer=[],inner=[];
+  for(let i=0;i<=120;i++){const t=.18+i/120*(TAU-.36);outer.push(heartAt(t,1));inner.push(heartAt(t,1-wR*1.6));}
+  const band=outer.concat(inner.slice().reverse());
+  els.push(F_(band,.05,.6,hsl(c.bloom,.9)));els.push(L_(outer,0,.6,hsl(c.outline),1.6));els.push(L_(inner,0,.6,hsl(c.outline),1.2));
+  for(let k=0;k<12;k++){const t=.3+k/12*(TAU-.6),a=heartAt(t,1),b=heartAt(t+.12,1-wR*1.6);els.push(L_([a,b],.3+k*.02,.36+k*.02,hsl(c.bloomIn,.6),1));}
+  const top=heartAt(0,1-wR*.8),bw=.16+.05*((code(f,21)%3)/2);
+  for(const s of[-1,1]){const loop=[];for(let i=0;i<=24;i++){const a=i/24*TAU;loop.push(P(top.x+s*bw*(.55+.45*Math.cos(a)),top.y-.02+bw*.45*Math.sin(a)));}
+    els.push(F_(loop,.65,.75,hsl(c.bloom)));els.push(L_(loop,.62,.75,hsl(c.outline),1.4));
+    const tail=[P(top.x,top.y),P(top.x+s*.08,top.y+.2),P(top.x+s*.05,top.y+.26),P(top.x+s*.12,top.y+.24)];
+    els.push(L_(tail,.75,.85,hsl(c.outline),2.4));}
+  els.push(D_(top.x,top.y,.035,.78,.86,hsl(c.outline)));
+  return els;
+}
+
 /* ================= the AI layer: key words, colours, energy ================= */
 let AI=null;   // {keywords:[...], palette:['#hex','#hex'], energy:1..5} — comes with the chosen draft
 
@@ -374,9 +589,11 @@ function chooseShape(text){
     const pool=mood==='festive'?SNOW_COLORS.filter(x=>/gold/.test(x.name)):SNOW_COLORS.filter(x=>!/gold/.test(x.name));
     const t=SNOWS[Math.floor(f.h/7)%SNOWS.length],v=pool[f.letterSum%pool.length],c=snowCol(v);
     return{els:t.build(f,R,c),accent:aiAccent||hsl(c.line),label:t.name+' · '+v.name};}
-  if(occ==='thanks'){const v=pickVariant(HEART_COLORS,'bloom',f),c=heartCol(v);
-    return{els:buildHeart(f,R,c),accent:aiAccent||hsl(c.bloom[2]>70?[c.bloom[0],c.bloom[1],55]:c.bloom),label:'Heart · '+v.name};}
-  const shift=occ==='celebration'?4:0,t=FLOWERS[(f.h+shift)%FLOWERS.length],v=pickVariant(t.variants,'petal',f),c=colors(v);
+  if(occ==='thanks'){const kind=HEART_KINDS[Math.floor(f.h/8)%HEART_KINDS.length],v=pickVariant(HEART_COLORS,'bloom',f),c=heartCol(v);
+    return{els:buildHeartKind(kind,f,R,c),accent:aiAccent||hsl(c.bloom[2]>70?[c.bloom[0],c.bloom[1],55]:c.bloom),label:HEART_NAMES[kind]+' · '+v.name};}
+  if(occ==='birthday'){const v=pickVariant(CAKE_COLORS,'body',f),c=cakeCol(v),cake=buildCake(f,R,c,text);
+    return{els:cake.els,flames:cake.flames,accent:aiAccent||hsl([c.accent[0],c.accent[1],Math.min(55,c.accent[2])]),label:'Cake · '+v.name};}
+  const t=FLOWERS[f.h%FLOWERS.length],v=pickVariant(t.variants,'petal',f),c=colors(v);
   const acc=c.petal[2]>80?c.inner:c.petal;
   return{els:t.build(f,R,c),accent:aiAccent||hsl(celestial?[acc[0],acc[1],Math.max(62,acc[2])]:[acc[0],acc[1],Math.min(55,acc[2])]),label:t.name+' · '+v.name};
 }
@@ -602,7 +819,8 @@ function paint(ctx,els,p,mono){
     if(e.k==='fill'){
       if(mono){ctx.globalAlpha=.18*q;ctx.fillStyle=mono;}
       else{ctx.globalAlpha=q*(celestial?.62:.95);
-        if(e.stops){const g=ctx.createRadialGradient(c,c,e.r0*u,c,c,Math.max(e.r0+.01,e.r1)*u);for(const[o,col]of e.stops)g.addColorStop(o,col);ctx.fillStyle=g;}else ctx.fillStyle=e.col;}
+        if(e.lin){const g=ctx.createLinearGradient(0,Y(P(0,e.lin[0])),0,Y(P(0,e.lin[1])));for(const[o,col]of e.stops)g.addColorStop(o,col);ctx.fillStyle=g;}
+        else if(e.stops){const g=ctx.createRadialGradient(c,c,e.r0*u,c,c,Math.max(e.r0+.01,e.r1)*u);for(const[o,col]of e.stops)g.addColorStop(o,col);ctx.fillStyle=g;}else ctx.fillStyle=e.col;}
       tracePath(ctx,e.pts,X,Y);ctx.closePath();ctx.fill();ctx.globalAlpha=1;
     }else if(e.k==='line'){
       const n=e.pts.length-1,upto=q*n,full=Math.floor(upto);
@@ -614,6 +832,13 @@ function paint(ctx,els,p,mono){
       const col=mono||(typeof e.col==='string'?e.col:hsl(e.col));
       if(celestial&&!mono){ctx.globalAlpha=.22;ctx.strokeStyle=col;ctx.lineWidth=e.w*px*3.2;ctx.stroke();ctx.globalAlpha=1;}
       ctx.globalAlpha=mono?.85:1;ctx.strokeStyle=col;ctx.lineWidth=e.w*px*(mono?.7:1);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+    }else if(e.k==='text'){
+      /* a number candle: a big numeral, filled and outlined */
+      ctx.save();ctx.globalAlpha=q;ctx.translate(X(e),Y(e));const sc=.7+.3*q;ctx.scale(sc,sc);
+      ctx.font=`700 ${e.size*u}px 'DM Sans',Arial,sans-serif`;ctx.textAlign='center';ctx.textBaseline='alphabetic';   // lining figures, so every digit has the same height
+      if(mono){ctx.fillStyle=mono;ctx.globalAlpha=.85*q;ctx.fillText(e.txt,0,0);}
+      else{ctx.fillStyle=e.col;ctx.fillText(e.txt,0,0);ctx.lineWidth=1.4*px;ctx.strokeStyle=e.stroke;ctx.strokeText(e.txt,0,0);}
+      ctx.restore();
     }else{
       const k=q<1?1+.35*Math.sin(q*Math.PI):1;
       if(celestial&&!mono){ctx.globalAlpha=.25;ctx.fillStyle=e.col;ctx.beginPath();ctx.arc(X(e),Y(e),e.r*u*k*q*2,0,TAU);ctx.fill();ctx.globalAlpha=1;}
@@ -707,3 +932,19 @@ function fxStep(o,dt){
   for(const p of o.parts)drawPart(ctx,p);
 }
 const IDLE_RATE={warm:1.2,playful:3,festive:2.4};
+
+/* ================= candles: make a wish ================= */
+function makeWish(){return{lit:0,blown:0,blownAt:-1};}
+/* draws the card and, for a cake, its flames and smoke; t = seconds (for the flicker) */
+function paintCard(sc,p,wish,t){
+  paint(sc.ctx,sc.els,p,null);
+  if(!sc.flames)return;
+  if(wish.lit>0)drawFlames(sc.ctx,sc.flames,t,wish.lit,wish.blown);
+  if(wish.blownAt>=0)drawSmoke(sc.ctx,sc.flames,t-wish.blownAt);
+}
+function blowCandles(wish,t,done){
+  if(!wish.lit||wish.blownAt>=0)return false;
+  wish.blownAt=t;const t0=performance.now();
+  const step=()=>{wish.blown=Math.min(1,(performance.now()-t0)/450);if(wish.blown<1)requestAnimationFrame(step);else{wish.lit=0;if(done)done();}};
+  requestAnimationFrame(step);return true;
+}

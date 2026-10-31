@@ -86,6 +86,8 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 .msg span.key{color:var(--accent);font-weight:600}
 .primary{display:none;width:100%;border:1px solid var(--gold);background:linear-gradient(135deg,#bd8b43,#e0bd75);color:var(--btn);padding:15px;border-radius:30px;font:700 16px 'DM Sans',sans-serif;box-shadow:0 4px 0 #9b6e31;cursor:pointer;margin-top:20px}
 .primary.show{display:block}
+.wish{text-align:center;font:italic 22px 'Cormorant Garamond',serif;color:var(--accent);margin-top:14px;animation:rise .6s ease both}
+#shape{cursor:pointer}
 [hidden]{display:none!important}
 /* the gift inside the envelope */
 .gift{margin-top:20px;background:var(--surface);border:1.5px solid var(--gold);border-radius:16px;padding:18px 18px 16px;text-align:center;box-shadow:0 10px 26px #674c2920;animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
@@ -141,6 +143,7 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
       <canvas class="fx" id="fx"></canvas>
       <div class="msg" id="msg"></div>
     </div>
+    <p class="wish" id="wish" hidden>Make a wish — tap the candles</p>
     <button class="primary" id="again">▶ Play again</button>
     <div class="gift" id="gift" hidden>
       <svg viewBox="0 0 64 64" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round">
@@ -166,11 +169,13 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 <script src="/js/desk.js"></script>
 <script>
 Desk.setNotes({
-  envelope:['A sealed card','<p>Tap the wax seal. The shape pressed into it is the card\'s own flower, snowflake or heart.</p>'],
+  envelope:['A sealed card','<p>Tap the wax seal. The shape pressed into it is the card\'s own cake, flower, snowflake or heart.</p>'],
+  wish:['Make a wish','<p>The cake was drawn from the message, with <b>one candle for every year</b> it mentions. Tap the candles to blow them out.</p>'],
   card:['The card plays','<p>The tune begins with <b>your name</b> and ends with <b>the sender\'s</b>: every letter becomes a note. The words light up as they are sung.</p>'],
   gift:['A gift inside','<p>The gift is sent with <b>PayPal Payouts</b> to the email you give, once per card. In this demo it is sandbox money.</p>']});
 Desk.notes('envelope');
-let occ='birthday', mood='warm', celestial=false, cardText='', scene=null, cardData=null;
+let occ='birthday', mood='warm', celestial=false, cardText='', scene=null, cardData=null, wish=makeWish();
+const nowS=()=>performance.now()/1000;
 const cv=document.getElementById('shape'),msgEl=document.getElementById('msg'),cardEl=document.getElementById('card');
 const env=document.getElementById('env'),seal=document.getElementById('seal');
 const FXC=makeFx(document.getElementById('fx')),FXE=makeFx(document.getElementById('envfx'));
@@ -235,7 +240,7 @@ function crackSound(){
 function showCard(){
   cardEl.className='cardx show '+mood;
   sizeCanvas(cv,cv.clientWidth||300);scene.ctx=cv.getContext('2d');
-  spans=fillMessage(msgEl,cardText,true);
+  spans=fillMessage(msgEl,cardText,true);wish=makeWish();
   paint(scene.ctx,scene.els,0,null);
   requestAnimationFrame(()=>cardToTop(cardEl));
   requestAnimationFrame(()=>{FXE.parts=[];sizeFx(FXC);FXC.parts=[];FXC.on=true;});
@@ -247,28 +252,46 @@ function stopCard(){
 async function play(){
   stopCard();cardToTop(cardEl);
   document.getElementById('again').classList.remove('show');
-  if(!buffers){try{await loadPiano();}catch(e){spans.forEach(s=>s.classList.remove('wait'));paint(scene.ctx,scene.els,1,null);document.getElementById('again').classList.add('show');return;}}
+  if(!buffers){try{await loadPiano();}catch(e){spans.forEach(s=>s.classList.remove('wait'));paint(scene.ctx,scene.els,1,null);document.getElementById('again').classList.add('show');afterSong();return;}}
+  wish=makeWish();document.getElementById('wish').hidden=true;
   const song=compose(cardText),t0=actx.currentTime+.2,srcs=[];
   for(const n of[...song.notes,...song.bass,...song.fin])srcs.push(key(n.midi,t0+n.t,n.dur,n.vol));
   playing={srcs};Desk.notes('card');Desk.score(song,()=>actx.currentTime-t0);
   spans.forEach(s=>{s.classList.add('wait');s.classList.remove('now','key');});
   const tick=()=>{
     if(!playing)return;
-    const el=actx.currentTime-t0;
-    paint(scene.ctx,scene.els,clamp(el/song.total),null);
+    const el=actx.currentTime-t0,p=clamp(el/song.total);
+    wish.lit=p>=.97?Math.min(1,(p-.97)/.03):0;
+    paintCard(scene,p,wish,nowS());
     for(const w of song.words){const s=spans[w.word];if(!s)continue;
       if(el>=w.t){if(s.classList.contains('wait')){emitEdge(FXC,w.key?5:(mood==='warm'?1:2));if(w.key)s.classList.add('key');followWord(s);}s.classList.remove('wait');s.classList.toggle('now',el<w.t+.45);}}
     if(el<song.total+.6)raf=requestAnimationFrame(tick);
-    else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));document.getElementById('again').classList.add('show');showGift();}
+    else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));document.getElementById('again').classList.add('show');afterSong();}
   };
   raf=requestAnimationFrame(tick);
 }
+
+/* after the tune: a cake asks for a wish first, then the gift comes out of the envelope */
+let wishTimer=0;
+function afterSong(){
+  if(scene.flames&&!wish.blown){
+    wish.lit=1;const w=document.getElementById('wish');w.textContent='Make a wish — tap the candles';w.hidden=false;Desk.notes('wish');
+    clearTimeout(wishTimer);wishTimer=setTimeout(showGift,9000);   // the gift does not wait forever
+  }else showGift();
+}
+cv.addEventListener('click',()=>{
+  if(!blowCandles(wish,nowS(),()=>setTimeout(showGift,700)))return;
+  clearTimeout(wishTimer);document.getElementById('wish').textContent='Your wish is on its way ✨';
+  for(let i=0;i<14;i++)setTimeout(()=>emitEdge(FXC,2),i*70);
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>setTimeout(()=>{try{key(Math.round(69+12*Math.log2(f/440)),actx.currentTime,.7,.2)}catch(e){}},i*90));
+});
 
 /* ================= sparkles ================= */
 let fxLast=0,idleAcc=0,envAcc=0;
 function fxLoop(now){
   const dt=Math.min(.05,(now-(fxLast||now))/1000);fxLast=now;
-  if(FXC.on&&!playing){idleAcc+=dt*IDLE_RATE[mood];while(idleAcc>=1){emitEdge(FXC,1);idleAcc--;}}
+  if(FXC.on&&!playing){idleAcc+=dt*IDLE_RATE[mood];while(idleAcc>=1){emitEdge(FXC,1);idleAcc--;}
+    if(scene&&scene.flames&&(wish.lit||(wish.blownAt>=0&&nowS()-wish.blownAt<3)))paintCard(scene,1,wish,nowS());}
   if(FXE.on){envAcc+=dt*2.2;while(envAcc>=1){const a=Math.random()*6.28,d=48+Math.random()*30;
     spawn(FXE,occ==='thanks'?(Math.random()<.5?'heart':'twinkle'):'twinkle',FXE.w/2+Math.cos(a)*d,190+Math.sin(a)*d*.8);envAcc--;}}
   if(FXE.w)fxStep(FXE,dt);
