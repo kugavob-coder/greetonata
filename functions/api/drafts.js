@@ -1,18 +1,26 @@
-import { cleanCardAI } from './_paypal.js';
+import { cleanCardAI, rateLimited, tooMany } from './_shared.js';
 // POST /api/drafts — asks Groq for three greeting-card drafts in three tones.
 // The Groq key lives only in Cloudflare (env.GROQ_API_KEY), never in the browser.
 
 // models we prefer, in order; the first one this Groq account can use is chosen
-const PREFERRED = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
+const PREFERRED = [
+  'llama-3.3-70b-versatile',
+  'openai/gpt-oss-120b',
+  'openai/gpt-oss-20b',
+  'llama-3.1-8b-instant',
+];
 let chosenModel = null;
 async function pickModel(key) {
   if (chosenModel) return chosenModel;
   try {
-    const r = await fetch('https://api.groq.com/openai/v1/models', { headers: { Authorization: `Bearer ${key}` } });
+    const r = await fetch('https://api.groq.com/openai/v1/models', {
+      headers: { Authorization: `Bearer ${key}` },
+    });
     const ids = ((await r.json()).data || []).map(m => m.id);
-    chosenModel = PREFERRED.find(m => ids.includes(m))
-      || ids.find(id => /llama|gpt-oss|qwen|gemma|kimi/i.test(id) && !/whisper|guard|tts|prompt/i.test(id))
-      || null;
+    chosenModel =
+      PREFERRED.find(m => ids.includes(m)) ||
+      ids.find(id => /llama|gpt-oss|qwen|gemma|kimi/i.test(id) && !/whisper|guard|tts|prompt/i.test(id)) ||
+      null;
     console.log('Groq model chosen:', chosenModel, '| available:', ids.join(', '));
   } catch (e) {
     console.log('Groq model list failed:', String(e));
@@ -22,7 +30,8 @@ async function pickModel(key) {
 const TONES = ['Warm', 'Playful', 'Festive'];
 const OCCASIONS = {
   birthday: 'a birthday',
-  celebration: 'a happy celebration (for example a wedding, graduation, new baby, new home or promotion — use the details to tell which)',
+  celebration:
+    'a happy celebration (for example a wedding, graduation, new baby, new home or promotion — use the details to tell which)',
   xmas: 'Christmas and the New Year',
   thanks: 'saying thank you',
 };
@@ -43,6 +52,7 @@ function clean(value, max) {
 }
 
 export async function onRequestPost({ request, env }) {
+  if (rateLimited(request, 'drafts', 10, 600)) return tooMany();
   if (!env.GROQ_API_KEY) return json({ error: 'The AI service is not configured.' }, 500);
 
   let body;
@@ -81,7 +91,9 @@ export async function onRequestPost({ request, env }) {
     `Who they are to the sender: ${relation || 'not given'}`,
     `Details: ${details || 'none'}`,
     round > 1 ? `This is attempt ${round}: use fresh wording, different from earlier attempts.` : '',
-  ].filter(Boolean).join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 
   const model = await pickModel(env.GROQ_API_KEY);
   const extra = model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {};
@@ -110,8 +122,12 @@ export async function onRequestPost({ request, env }) {
     // the reason goes to the Cloudflare logs only (never the key)
     const raw = await res.text().catch(() => '');
     let message = raw;
-    try { message = JSON.parse(raw).error.message; } catch {}
-    message = String(message).replace(/gsk_[A-Za-z0-9]+/g, '[key]').slice(0, 160);
+    try {
+      message = JSON.parse(raw).error.message;
+    } catch {}
+    message = String(message)
+      .replace(/gsk_[A-Za-z0-9]+/g, '[key]')
+      .slice(0, 160);
     console.log('Groq error', res.status, model, message);
     if (res.status === 404) chosenModel = null;
     return json({ error: 'The AI service returned an error.' }, 502);
@@ -125,10 +141,14 @@ export async function onRequestPost({ request, env }) {
     console.log('Groq answer could not be parsed:', String(e));
     return json({ error: 'The AI answer could not be read.' }, 502);
   }
-  if (!Array.isArray(drafts) || drafts.length < 3) return json({ error: 'The AI answer was incomplete.' }, 502);
+  if (!Array.isArray(drafts) || drafts.length < 3)
+    return json({ error: 'The AI answer was incomplete.' }, 502);
 
   const out = drafts.slice(0, 3).map((d, i) => {
-    const text = String(d && d.text || '').replace(/\r/g, '').trim().slice(0, 900);
+    const text = String((d && d.text) || '')
+      .replace(/\r/g, '')
+      .trim()
+      .slice(0, 900);
     return { tone: TONES[i], text, ai: cleanCardAI(d, text) };
   });
   if (out.some(d => !d.text)) return json({ error: 'The AI answer was incomplete.' }, 502);

@@ -1,13 +1,20 @@
 // POST /api/capture — captures the approved PayPal (sandbox) payment, then saves the card
 // under a new private id and returns that id for the link.
-import { PAYPAL_API, json, paypalToken, newId } from './_paypal.js';
+import { PAYPAL_API, json, paypalToken, newId, rateLimited, tooMany } from './_shared.js';
 
 export async function onRequestPost({ request, env }) {
+  if (rateLimited(request, 'capture', 20, 600)) return tooMany();
   if (!env.CARDS) return json({ error: 'The shop is not configured.' }, 500);
 
   let body;
-  try { body = await request.json(); } catch { return json({ error: 'Invalid request.' }, 400); }
-  const orderId = String(body.orderID || '').replace(/[^A-Za-z0-9-]/g, '').slice(0, 40);
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'Invalid request.' }, 400);
+  }
+  const orderId = String(body.orderID || '')
+    .replace(/[^A-Za-z0-9-]/g, '')
+    .slice(0, 40);
   if (!orderId) return json({ error: 'Missing order.' }, 400);
 
   const pending = await env.CARDS.get(`pending:${orderId}`, 'json');
@@ -24,7 +31,15 @@ export async function onRequestPost({ request, env }) {
     if (!res.ok || data.status !== 'COMPLETED' || !capture) {
       console.log('PayPal capture failed', res.status, JSON.stringify(data).slice(0, 300));
       const declined = (data?.details || []).some(d => d.issue === 'INSTRUMENT_DECLINED');
-      return json({ error: declined ? 'The payment was declined. Please try another way to pay.' : 'The payment could not be completed.', declined }, 402);
+      return json(
+        {
+          error: declined
+            ? 'The payment was declined. Please try another way to pay.'
+            : 'The payment could not be completed.',
+          declined,
+        },
+        402,
+      );
     }
     if (capture.amount?.value !== pending.total) {
       console.log('PayPal amount mismatch', capture.amount?.value, pending.total);
@@ -33,9 +48,18 @@ export async function onRequestPost({ request, env }) {
 
     const id = newId();
     const card = {
-      occasion: pending.occasion, to: pending.to, from: pending.from, text: pending.text,
-      mood: pending.mood, style: pending.style, gift: pending.gift, ai: pending.ai || null,
-      paid: pending.total, orderId, captureId: capture.id, created: new Date().toISOString(),
+      occasion: pending.occasion,
+      to: pending.to,
+      from: pending.from,
+      text: pending.text,
+      mood: pending.mood,
+      style: pending.style,
+      gift: pending.gift,
+      ai: pending.ai || null,
+      paid: pending.total,
+      orderId,
+      captureId: capture.id,
+      created: new Date().toISOString(),
     };
     await env.CARDS.put(`card:${id}`, JSON.stringify(card));
     await env.CARDS.delete(`pending:${orderId}`);

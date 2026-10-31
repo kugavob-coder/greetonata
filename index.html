@@ -1,664 +1,1915 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Greetonata — messages that bloom into music</title>
-<meta name="description" content="A greeting card where your words become a flower and a melody.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#f5eddf;--surface:#fff9ef;--field:#fffdf7;--paper:#fffaf1;--ink:#493629;--muted:#7d6a57;
-  --gold:#a87832;--gold2:#d9b66d;--line:#dfcba8;
-  --accent:#d97861;--accent-soft:#f2d5c5;
-  --btn-text:#3d2d20;--shadow:0 10px 26px #674c2920;
-}
-body.celestial{
-  --bg:#151b35;--surface:#202744;--field:#1a2140;--paper:#1c2342;--ink:#e7c987;--muted:#c4ad7e;
-  --gold:#d9b66d;--gold2:#f0d99b;--line:#6f5f4c;
-  --btn-text:#2a2219;--shadow:0 10px 26px #0006;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
-body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.5;transition:background .5s,color .5s}
-body.celestial{background:#141a31 radial-gradient(ellipse at 50% 20%,#2f3660 0%,#1b2340 45%,#141a31 100%) fixed}
-button{font:inherit;cursor:pointer;color:inherit}
-button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Greetonata — messages that bloom into music</title>
+    <meta name="description" content="A greeting card where your words become a flower and a melody." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f5eddf;
+        --surface: #fff9ef;
+        --field: #fffdf7;
+        --paper: #fffaf1;
+        --ink: #493629;
+        --muted: #7d6a57;
+        --gold: #a87832;
+        --gold2: #d9b66d;
+        --line: #dfcba8;
+        --accent: #d97861;
+        --accent-soft: #f2d5c5;
+        --btn-text: #3d2d20;
+        --shadow: 0 10px 26px #674c2920;
+      }
+      body.celestial {
+        --bg: #151b35;
+        --surface: #202744;
+        --field: #1a2140;
+        --paper: #1c2342;
+        --ink: #e7c987;
+        --muted: #c4ad7e;
+        --gold: #d9b66d;
+        --gold2: #f0d99b;
+        --line: #6f5f4c;
+        --btn-text: #2a2219;
+        --shadow: 0 10px 26px #0006;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        transition:
+          background 0.5s,
+          color 0.5s;
+      }
+      body.celestial {
+        background: #141a31 radial-gradient(ellipse at 50% 20%, #2f3660 0%, #1b2340 45%, #141a31 100%) fixed;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        color: inherit;
+      }
+      button:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 3px;
+      }
 
-.demo{background:var(--accent-soft);color:var(--ink);text-align:center;font-size:13px;padding:6px 12px;border-bottom:1px solid var(--line);transition:background .5s}
-.app{max-width:460px;margin:0 auto;padding:0 18px 36px;overflow:hidden}
+      .demo {
+        background: var(--accent-soft);
+        color: var(--ink);
+        text-align: center;
+        font-size: 13px;
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--line);
+        transition: background 0.5s;
+      }
+      .app {
+        max-width: 460px;
+        margin: 0 auto;
+        padding: 0 18px 36px;
+        overflow: hidden;
+      }
 
-/* header */
-.top{height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-.brand{font:600 26px 'Cormorant Garamond',serif;color:var(--ink)}
-.brand span{color:var(--gold)}
-.top-actions{display:flex;gap:8px;align-items:center}
-.style-switch{display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden}
-.style-switch button{border:0;background:transparent;padding:6px 11px;font-size:12px;font-weight:600;color:var(--muted)}
-.style-switch button.on{background:var(--gold);color:var(--btn-text)}
-.icon-btn{width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--gold);font-size:16px}
-@media (max-width:350px){.brand{font-size:21px}.style-switch button{padding:6px 7px;font-size:11px}.icon-btn{width:32px;height:32px}.top-actions{gap:5px}.app{padding:0 12px 30px}}
+      /* header */
+      .top {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        font:
+          600 26px 'Cormorant Garamond',
+          serif;
+        color: var(--ink);
+      }
+      .brand span {
+        color: var(--gold);
+      }
+      .top-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .style-switch {
+        display: flex;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+      .style-switch button {
+        border: 0;
+        background: transparent;
+        padding: 6px 11px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .style-switch button.on {
+        background: var(--gold);
+        color: var(--btn-text);
+      }
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: transparent;
+        color: var(--gold);
+        font-size: 16px;
+      }
+      @media (max-width: 350px) {
+        .brand {
+          font-size: 21px;
+        }
+        .style-switch button {
+          padding: 6px 7px;
+          font-size: 11px;
+        }
+        .icon-btn {
+          width: 32px;
+          height: 32px;
+        }
+        .top-actions {
+          gap: 5px;
+        }
+        .app {
+          padding: 0 12px 30px;
+        }
+      }
 
-/* progress */
-.steps{display:flex;justify-content:center;gap:8px;margin:16px 0 4px}
-.steps i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.3s}
-.steps i.on{background:var(--accent);transform:scale(1.35)}
+      /* progress */
+      .steps {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin: 16px 0 4px;
+      }
+      .steps i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--line);
+        transition: 0.3s;
+      }
+      .steps i.on {
+        background: var(--accent);
+        transform: scale(1.35);
+      }
 
-.screen{display:none;animation:appear .55s ease both}
-.screen.on{display:block}
-@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+      .screen {
+        display: none;
+        animation: appear 0.55s ease both;
+      }
+      .screen.on {
+        display: block;
+      }
+      @keyframes appear {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
 
-.kicker{font-size:12px;text-transform:uppercase;letter-spacing:2.5px;color:var(--gold);text-align:center;margin:14px 0 8px;font-weight:600}
-h1{font:500 clamp(46px,13vw,62px)/.92 'Cormorant Garamond',serif;letter-spacing:-1px;text-align:center}
-h1 em,h2 em{font-style:italic;color:var(--accent);transition:color .5s}
-h2{font:500 38px/1.02 'Cormorant Garamond',serif;text-align:center}
-.intro{font:italic 19px/1.4 'Cormorant Garamond',serif;color:var(--muted);text-align:center;margin:12px auto 0;max-width:300px}
-.flourish{display:block;width:180px;height:16px;margin:10px auto 0;overflow:visible}
-.flourish path{fill:none;stroke:var(--gold);stroke-width:1.3;stroke-dasharray:400;stroke-dashoffset:400;animation:draw 1.8s .2s ease forwards}
-@keyframes draw{to{stroke-dashoffset:0}}
+      .kicker {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2.5px;
+        color: var(--gold);
+        text-align: center;
+        margin: 14px 0 8px;
+        font-weight: 600;
+      }
+      h1 {
+        font:
+          500 clamp(46px, 13vw, 62px) / 0.92 'Cormorant Garamond',
+          serif;
+        letter-spacing: -1px;
+        text-align: center;
+      }
+      h1 em,
+      h2 em {
+        font-style: italic;
+        color: var(--accent);
+        transition: color 0.5s;
+      }
+      h2 {
+        font:
+          500 38px/1.02 'Cormorant Garamond',
+          serif;
+        text-align: center;
+      }
+      .intro {
+        font:
+          italic 19px/1.4 'Cormorant Garamond',
+          serif;
+        color: var(--muted);
+        text-align: center;
+        margin: 12px auto 0;
+        max-width: 300px;
+      }
+      .flourish {
+        display: block;
+        width: 180px;
+        height: 16px;
+        margin: 10px auto 0;
+        overflow: visible;
+      }
+      .flourish path {
+        fill: none;
+        stroke: var(--gold);
+        stroke-width: 1.3;
+        stroke-dasharray: 400;
+        stroke-dashoffset: 400;
+        animation: draw 1.8s 0.2s ease forwards;
+      }
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
 
-/* hero */
-.hero-art{height:300px;position:relative;display:grid;place-items:center}
-.glow{position:absolute;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,#e9c98266,transparent 68%);animation:pulse 4s ease-in-out infinite}
-@keyframes pulse{50%{transform:scale(1.13);opacity:.65}}
-.orbit{position:absolute;width:290px;height:170px;border:1px solid var(--gold2);border-radius:50%;transform:rotate(-24deg);opacity:.8}
-.hero-cv{width:240px;height:240px;position:relative;transition:opacity .6s}
-.hero-cv.fade{opacity:0}
-.note{position:absolute;color:var(--gold);font:28px 'Cormorant Garamond',serif;animation:noteFloat 4s ease-in-out infinite}
-.n1{left:10%;top:22%}.n2{right:9%;top:34%;animation-delay:1s}.n3{left:20%;bottom:14%;animation-delay:2s}.n4{right:18%;bottom:12%;animation-delay:.6s}
-@keyframes noteFloat{50%{transform:translateY(-12px) rotate(8deg)}}
-.values{display:flex;justify-content:center;gap:28px;margin:22px 0 8px;padding-bottom:6px}
-.value{line-height:1.35}
-/* on a phone the whole first screen fits, nothing is cut at the bottom */
-@media (max-height:900px) and (max-width:600px){
-  .hero-art{height:240px}
-  .hero-cv{width:200px;height:200px}
-  .orbit{width:250px;height:150px}
-  .glow{width:190px;height:190px}
-  #s1 .intro{margin-top:8px}
-}
-.value{font:italic 16px 'Cormorant Garamond',serif;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
-.value b{font-size:20px;color:var(--gold);font-weight:400}
+      /* hero */
+      .hero-art {
+        height: 300px;
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+      .glow {
+        position: absolute;
+        width: 230px;
+        height: 230px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #e9c98266, transparent 68%);
+        animation: pulse 4s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        50% {
+          transform: scale(1.13);
+          opacity: 0.65;
+        }
+      }
+      .orbit {
+        position: absolute;
+        width: 290px;
+        height: 170px;
+        border: 1px solid var(--gold2);
+        border-radius: 50%;
+        transform: rotate(-24deg);
+        opacity: 0.8;
+      }
+      .hero-cv {
+        width: 240px;
+        height: 240px;
+        position: relative;
+        transition: opacity 0.6s;
+      }
+      .hero-cv.fade {
+        opacity: 0;
+      }
+      .note {
+        position: absolute;
+        color: var(--gold);
+        font:
+          28px 'Cormorant Garamond',
+          serif;
+        animation: noteFloat 4s ease-in-out infinite;
+      }
+      .n1 {
+        left: 10%;
+        top: 22%;
+      }
+      .n2 {
+        right: 9%;
+        top: 34%;
+        animation-delay: 1s;
+      }
+      .n3 {
+        left: 20%;
+        bottom: 14%;
+        animation-delay: 2s;
+      }
+      .n4 {
+        right: 18%;
+        bottom: 12%;
+        animation-delay: 0.6s;
+      }
+      @keyframes noteFloat {
+        50% {
+          transform: translateY(-12px) rotate(8deg);
+        }
+      }
+      .values {
+        display: flex;
+        justify-content: center;
+        gap: 28px;
+        margin: 22px 0 8px;
+        padding-bottom: 6px;
+      }
+      .value {
+        line-height: 1.35;
+      }
+      /* on a phone the whole first screen fits, nothing is cut at the bottom */
+      @media (max-height: 900px) and (max-width: 600px) {
+        .hero-art {
+          height: 240px;
+        }
+        .hero-cv {
+          width: 200px;
+          height: 200px;
+        }
+        .orbit {
+          width: 250px;
+          height: 150px;
+        }
+        .glow {
+          width: 190px;
+          height: 190px;
+        }
+        #s1 .intro {
+          margin-top: 8px;
+        }
+      }
+      .value {
+        font:
+          italic 16px 'Cormorant Garamond',
+          serif;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .value b {
+        font-size: 20px;
+        color: var(--gold);
+        font-weight: 400;
+      }
 
-/* buttons */
-.primary{display:block;width:100%;border:1px solid var(--gold);background:linear-gradient(135deg,#bd8b43,#e0bd75);color:var(--btn-text);padding:15px 20px;border-radius:30px;font-size:15px;font-weight:700;letter-spacing:.6px;box-shadow:0 4px 0 #9b6e31;transition:transform .15s,box-shadow .15s,opacity .2s}
-body.celestial .primary{background:linear-gradient(135deg,#d4aa5d,#f0d99b);box-shadow:0 4px 0 #8a6a35}
-.primary:active{transform:translateY(3px);box-shadow:0 1px 0 #9b6e31}
-.primary:disabled{opacity:.4;cursor:default;transform:none}
-.secondary{display:block;width:100%;border:1px solid var(--line);background:transparent;color:var(--gold);padding:13px 20px;border-radius:30px;font-size:14px;font-weight:600}
-.secondary:disabled{opacity:.4;cursor:default}
-.back{border:0;background:none;color:var(--gold);font-size:13px;font-weight:600;letter-spacing:.5px;padding:10px 0 0}
-.mt{margin-top:22px}.mt-s{margin-top:12px}
+      /* buttons */
+      .primary {
+        display: block;
+        width: 100%;
+        border: 1px solid var(--gold);
+        background: linear-gradient(135deg, #bd8b43, #e0bd75);
+        color: var(--btn-text);
+        padding: 15px 20px;
+        border-radius: 30px;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        box-shadow: 0 4px 0 #9b6e31;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s,
+          opacity 0.2s;
+      }
+      body.celestial .primary {
+        background: linear-gradient(135deg, #d4aa5d, #f0d99b);
+        box-shadow: 0 4px 0 #8a6a35;
+      }
+      .primary:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 #9b6e31;
+      }
+      .primary:disabled {
+        opacity: 0.4;
+        cursor: default;
+        transform: none;
+      }
+      .secondary {
+        display: block;
+        width: 100%;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--gold);
+        padding: 13px 20px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .secondary:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .back {
+        border: 0;
+        background: none;
+        color: var(--gold);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        padding: 10px 0 0;
+      }
+      .mt {
+        margin-top: 22px;
+      }
+      .mt-s {
+        margin-top: 12px;
+      }
 
-/* occasions */
-.sub{font:italic 18px 'Cormorant Garamond',serif;color:var(--muted);text-align:center;margin-top:6px}
-.occasions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
-.occ{display:flex;flex-direction:column;justify-content:flex-start;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;text-align:center;padding:0 6px 14px;box-shadow:0 4px 12px #634b2b0d;transition:transform .25s,border-color .25s,box-shadow .25s}
-.occ.sel{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 10px 22px #a8783230}
-.occ .art{flex:none;height:120px;margin:0 -6px;display:grid;place-items:center;position:relative;overflow:hidden}
-.occ .art:before,.occ .art:after{content:"";position:absolute;border:1px solid #b78a4d70;border-radius:50%;width:104px;height:104px}
-.occ .art:after{width:80px;height:80px}
-.occ svg{width:90px;height:90px;position:relative;z-index:1;transition:transform .5s}
-.occ.sel svg{transform:rotate(18deg) scale(1.08)}
-.occ strong{display:block;font:600 21px/1.1 'Cormorant Garamond',serif;margin:11px 0 3px}
-.occ small{font-size:12px;color:var(--muted)}
-.a-birthday{background:linear-gradient(145deg,#f8e5d1,#eed2c1)}
-.a-celebration{background:linear-gradient(145deg,#f8e3e6,#efcbd6)}
-.a-xmas{background:linear-gradient(145deg,#e3ead8,#c6d7bf)}
-.a-thanks{background:linear-gradient(145deg,#f8ead4,#f0d3b0)}
-body.celestial .a-birthday{background:radial-gradient(circle,#6a5070,#29304e)}
-body.celestial .a-celebration{background:radial-gradient(circle,#6a4a6e,#2a2d4c)}
-body.celestial .a-xmas{background:radial-gradient(circle,#3f5e58,#202f42)}
-body.celestial .a-thanks{background:radial-gradient(circle,#6e5440,#302b4c)}
+      /* occasions */
+      .sub {
+        font:
+          italic 18px 'Cormorant Garamond',
+          serif;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 6px;
+      }
+      .occasions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 22px;
+      }
+      .occ {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        overflow: hidden;
+        text-align: center;
+        padding: 0 6px 14px;
+        box-shadow: 0 4px 12px #634b2b0d;
+        transition:
+          transform 0.25s,
+          border-color 0.25s,
+          box-shadow 0.25s;
+      }
+      .occ.sel {
+        transform: translateY(-4px);
+        border-color: var(--gold);
+        box-shadow: 0 10px 22px #a8783230;
+      }
+      .occ .art {
+        flex: none;
+        height: 120px;
+        margin: 0 -6px;
+        display: grid;
+        place-items: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .occ .art:before,
+      .occ .art:after {
+        content: '';
+        position: absolute;
+        border: 1px solid #b78a4d70;
+        border-radius: 50%;
+        width: 104px;
+        height: 104px;
+      }
+      .occ .art:after {
+        width: 80px;
+        height: 80px;
+      }
+      .occ svg {
+        width: 90px;
+        height: 90px;
+        position: relative;
+        z-index: 1;
+        transition: transform 0.5s;
+      }
+      .occ.sel svg {
+        transform: rotate(18deg) scale(1.08);
+      }
+      .occ strong {
+        display: block;
+        font:
+          600 21px/1.1 'Cormorant Garamond',
+          serif;
+        margin: 11px 0 3px;
+      }
+      .occ small {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .a-birthday {
+        background: linear-gradient(145deg, #f8e5d1, #eed2c1);
+      }
+      .a-celebration {
+        background: linear-gradient(145deg, #f8e3e6, #efcbd6);
+      }
+      .a-xmas {
+        background: linear-gradient(145deg, #e3ead8, #c6d7bf);
+      }
+      .a-thanks {
+        background: linear-gradient(145deg, #f8ead4, #f0d3b0);
+      }
+      body.celestial .a-birthday {
+        background: radial-gradient(circle, #6a5070, #29304e);
+      }
+      body.celestial .a-celebration {
+        background: radial-gradient(circle, #6a4a6e, #2a2d4c);
+      }
+      body.celestial .a-xmas {
+        background: radial-gradient(circle, #3f5e58, #202f42);
+      }
+      body.celestial .a-thanks {
+        background: radial-gradient(circle, #6e5440, #302b4c);
+      }
 
-/* form */
-.form{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 18px 20px;margin-top:20px;box-shadow:var(--shadow)}
-label{display:block;font:italic 18px 'Cormorant Garamond',serif;color:var(--muted);margin:14px 0 4px}
-input,textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--ink);font:16px 'DM Sans',sans-serif;outline:none;transition:border-color .2s}
-input::placeholder,textarea::placeholder{color:var(--muted);opacity:.7}
-input:focus,textarea:focus{border-color:var(--accent)}
-textarea{min-height:90px;resize:vertical;line-height:1.5}
+      /* form */
+      .form {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 6px 18px 20px;
+        margin-top: 20px;
+        box-shadow: var(--shadow);
+      }
+      label {
+        display: block;
+        font:
+          italic 18px 'Cormorant Garamond',
+          serif;
+        color: var(--muted);
+        margin: 14px 0 4px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        background: var(--field);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px;
+        color: var(--ink);
+        font:
+          16px 'DM Sans',
+          sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      input::placeholder,
+      textarea::placeholder {
+        color: var(--muted);
+        opacity: 0.7;
+      }
+      input:focus,
+      textarea:focus {
+        border-color: var(--accent);
+      }
+      textarea {
+        min-height: 90px;
+        resize: vertical;
+        line-height: 1.5;
+      }
 
-/* drafts: fan of letters */
-.left{text-align:center;font-size:14px;color:var(--muted);margin-top:8px}
-.test{text-align:center;font-size:13px;color:var(--muted);font-style:italic;margin-top:4px}
-.letters{position:relative;height:270px;margin:26px 0 8px}
-.letter{position:absolute;top:20px;width:48%;height:220px;border:1px solid var(--line);border-radius:6px;background:linear-gradient(160deg,var(--surface),var(--accent-soft));box-shadow:4px 8px 16px #59472b22;padding:16px 12px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;transition:transform .45s,box-shadow .45s,border-color .45s}
-body.celestial .letter{background:linear-gradient(160deg,#252c49,#1d2442)}
-.letter:before{content:"";position:absolute;inset:7px;border:1px solid #c4a46d70;border-radius:3px;pointer-events:none}
-.letter:nth-child(1){left:0;transform:rotate(-8deg);z-index:1}
-.letter:nth-child(2){left:26%;transform:rotate(1deg) translateY(-8px);z-index:2}
-.letter:nth-child(3){right:0;transform:rotate(8deg);z-index:1}
-.letter.sel{transform:translateY(-22px) scale(1.06) rotate(0);z-index:5;border-color:var(--gold);box-shadow:0 18px 28px #59472b40}
-.letter .tone{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)}
-.letter .orn{font-size:22px;color:var(--gold);margin:2px 0 6px}
-.letter p{font:500 17px/1.25 'Cormorant Garamond',serif;color:var(--ink);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
-.letter .wax{position:absolute;width:30px;height:30px;border-radius:50%;background:var(--accent);bottom:-11px;right:14px;box-shadow:0 2px 5px #5d3c2b44;display:grid;place-items:center;color:#fff3dc;font-size:13px}
-.deal .letter{animation:deal .5s ease both}
-.deal .letter:nth-child(2){animation-delay:.08s}.deal .letter:nth-child(3){animation-delay:.16s}
-@keyframes deal{from{opacity:0;margin-top:-40px}to{opacity:1;margin-top:0}}
-.err{text-align:center;color:var(--accent);margin-top:12px;min-height:22px;font-size:14px}
+      /* drafts: fan of letters */
+      .left {
+        text-align: center;
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .test {
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted);
+        font-style: italic;
+        margin-top: 4px;
+      }
+      .letters {
+        position: relative;
+        height: 270px;
+        margin: 26px 0 8px;
+      }
+      .letter {
+        position: absolute;
+        top: 20px;
+        width: 48%;
+        height: 220px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: linear-gradient(160deg, var(--surface), var(--accent-soft));
+        box-shadow: 4px 8px 16px #59472b22;
+        padding: 16px 12px 14px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition:
+          transform 0.45s,
+          box-shadow 0.45s,
+          border-color 0.45s;
+      }
+      body.celestial .letter {
+        background: linear-gradient(160deg, #252c49, #1d2442);
+      }
+      .letter:before {
+        content: '';
+        position: absolute;
+        inset: 7px;
+        border: 1px solid #c4a46d70;
+        border-radius: 3px;
+        pointer-events: none;
+      }
+      .letter:nth-child(1) {
+        left: 6px;
+        transform: rotate(-8deg);
+        z-index: 1;
+      }
+      .letter:nth-child(2) {
+        left: 26%;
+        transform: rotate(1deg) translateY(-8px);
+        z-index: 2;
+      }
+      .letter:nth-child(3) {
+        right: 6px;
+        transform: rotate(8deg);
+        z-index: 1;
+      }
+      .letter.sel {
+        transform: translateY(-22px) scale(1.06) rotate(0);
+        z-index: 5;
+        border-color: var(--gold);
+        box-shadow: 0 18px 28px #59472b40;
+      }
+      .letter .tone {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .letter .orn {
+        font-size: 22px;
+        color: var(--gold);
+        margin: 2px 0 6px;
+      }
+      .letter p {
+        font:
+          500 17px/1.25 'Cormorant Garamond',
+          serif;
+        color: var(--ink);
+        display: -webkit-box;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .letter .wax {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--accent);
+        bottom: -11px;
+        right: 14px;
+        box-shadow: 0 2px 5px #5d3c2b44;
+        display: grid;
+        place-items: center;
+        color: #fff3dc;
+        font-size: 13px;
+      }
+      .deal .letter {
+        animation: deal 0.5s ease both;
+      }
+      .deal .letter:nth-child(2) {
+        animation-delay: 0.08s;
+      }
+      .deal .letter:nth-child(3) {
+        animation-delay: 0.16s;
+      }
+      @keyframes deal {
+        from {
+          opacity: 0;
+          margin-top: -40px;
+        }
+        to {
+          opacity: 1;
+          margin-top: 0;
+        }
+      }
+      .err {
+        text-align: center;
+        color: var(--accent);
+        margin-top: 12px;
+        min-height: 22px;
+        font-size: 14px;
+      }
 
-/* the card */
-.cardx{position:relative;background:var(--paper);border-radius:8px;padding:26px 22px 30px;margin-top:16px;box-shadow:0 14px 34px #5a412422;overflow:hidden}
-body.celestial .cardx{box-shadow:0 14px 34px #0007}
-.cardx::before,.cardx::after{content:"";position:absolute;pointer-events:none}
-.cardx.warm::before{inset:9px;border:1.5px solid var(--accent);border-radius:16px;opacity:.75}
-.cardx.warm::after{inset:14px;border:1px solid var(--accent);border-radius:12px;opacity:.3}
-.cardx.playful::before{inset:9px;border:3px dotted var(--accent);border-radius:12px;opacity:.8}
-.cardx.festive::before{inset:8px;border:1.5px solid var(--gold)}
-.cardx.festive::after{inset:13px;border:.8px solid var(--gold);opacity:.7}
-.corner{position:absolute;width:46px;height:46px;pointer-events:none;display:none;color:var(--gold)}
-.cardx.festive .corner{display:block}
-.corner.tl{top:4px;left:4px}.corner.tr{top:4px;right:4px;transform:scaleX(-1)}
-.corner.bl{bottom:4px;left:4px;transform:scaleY(-1)}.corner.br{bottom:4px;right:4px;transform:scale(-1,-1)}
-.confetti{position:absolute;pointer-events:none}
-#shape{width:100%;max-width:230px;aspect-ratio:1;display:block;margin:-6px auto 6px;position:relative}
-.msg{font:500 20px/1.45 'Cormorant Garamond',serif;color:var(--ink);white-space:pre-wrap;position:relative;text-align:left;padding:0 6px}
-.msg span{transition:opacity .35s,color .6s}
-.msg span.wait{opacity:.12}
-.msg span.now{color:var(--accent)}
-.msg span.key{color:var(--accent);font-weight:600}
-.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+      /* the card */
+      .cardx {
+        position: relative;
+        background: var(--paper);
+        border-radius: 8px;
+        padding: 26px 22px 30px;
+        margin-top: 16px;
+        box-shadow: 0 14px 34px #5a412422;
+        overflow: hidden;
+      }
+      body.celestial .cardx {
+        box-shadow: 0 14px 34px #0007;
+      }
+      .cardx::before,
+      .cardx::after {
+        content: '';
+        position: absolute;
+        pointer-events: none;
+      }
+      .cardx.warm::before {
+        inset: 9px;
+        border: 1.5px solid var(--accent);
+        border-radius: 16px;
+        opacity: 0.75;
+      }
+      .cardx.warm::after {
+        inset: 14px;
+        border: 1px solid var(--accent);
+        border-radius: 12px;
+        opacity: 0.3;
+      }
+      .cardx.playful::before {
+        inset: 9px;
+        border: 3px dotted var(--accent);
+        border-radius: 12px;
+        opacity: 0.8;
+      }
+      .cardx.festive::before {
+        inset: 8px;
+        border: 1.5px solid var(--gold);
+      }
+      .cardx.festive::after {
+        inset: 13px;
+        border: 0.8px solid var(--gold);
+        opacity: 0.7;
+      }
+      .corner {
+        position: absolute;
+        width: 46px;
+        height: 46px;
+        pointer-events: none;
+        display: none;
+        color: var(--gold);
+      }
+      .cardx.festive .corner {
+        display: block;
+      }
+      .corner.tl {
+        top: 4px;
+        left: 4px;
+      }
+      .corner.tr {
+        top: 4px;
+        right: 4px;
+        transform: scaleX(-1);
+      }
+      .corner.bl {
+        bottom: 4px;
+        left: 4px;
+        transform: scaleY(-1);
+      }
+      .corner.br {
+        bottom: 4px;
+        right: 4px;
+        transform: scale(-1, -1);
+      }
+      .confetti {
+        position: absolute;
+        pointer-events: none;
+      }
+      #shape {
+        width: 100%;
+        max-width: 230px;
+        aspect-ratio: 1;
+        display: block;
+        margin: -6px auto 6px;
+        position: relative;
+      }
+      .msg {
+        font:
+          500 20px/1.45 'Cormorant Garamond',
+          serif;
+        color: var(--ink);
+        white-space: pre-wrap;
+        position: relative;
+        text-align: left;
+        padding: 0 6px;
+      }
+      .msg span {
+        transition:
+          opacity 0.35s,
+          color 0.6s;
+      }
+      .msg span.wait {
+        opacity: 0.12;
+      }
+      .msg span.now {
+        color: var(--accent);
+      }
+      .msg span.key {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .fx {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 5;
+      }
 
-/* payment */
-.pay{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px 18px;margin-top:22px;box-shadow:var(--shadow)}
-.pay h3{font:600 24px 'Cormorant Garamond',serif;text-align:center}
-.pay h3 em{font-style:italic;font-weight:500;color:var(--muted);font-size:18px}
-.gifts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 8px}
-.gifts button{border:1px solid var(--line);background:var(--field);border-radius:12px;padding:10px 0;font-weight:700;font-size:15px;color:var(--ink)}
-.gifts button.on{border-color:var(--gold);background:var(--accent-soft);box-shadow:0 0 0 2px var(--gold) inset}
-.gift-note{font:italic 16px/1.35 'Cormorant Garamond',serif;color:var(--muted);text-align:center;margin-bottom:12px}
-.sum{border-top:1px solid var(--line);padding-top:10px;margin-bottom:14px;font-size:15px}
-.sum div{display:flex;justify-content:space-between;padding:3px 0}
-.sum .total{font-weight:700;font-size:17px;border-top:1px dashed var(--line);margin-top:6px;padding-top:8px}
-#paypal-buttons{min-height:48px}
-.sim{display:block;width:100%;border:0;border-radius:24px;background:#ffc439;color:#253b80;font:700 16px 'DM Sans',sans-serif;padding:13px}
-.sim small{display:block;font-weight:500;font-size:11px;color:#3b4f7a}
+      /* payment */
+      .pay {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px 18px 18px;
+        margin-top: 22px;
+        box-shadow: var(--shadow);
+      }
+      .pay h3 {
+        font:
+          600 24px 'Cormorant Garamond',
+          serif;
+        text-align: center;
+      }
+      .pay h3 em {
+        font-style: italic;
+        font-weight: 500;
+        color: var(--muted);
+        font-size: 18px;
+      }
+      .gifts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin: 12px 0 8px;
+      }
+      .gifts button {
+        border: 1px solid var(--line);
+        background: var(--field);
+        border-radius: 12px;
+        padding: 10px 0;
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--ink);
+      }
+      .gifts button.on {
+        border-color: var(--gold);
+        background: var(--accent-soft);
+        box-shadow: 0 0 0 2px var(--gold) inset;
+      }
+      .gift-note {
+        font:
+          italic 16px/1.35 'Cormorant Garamond',
+          serif;
+        color: var(--muted);
+        text-align: center;
+        margin-bottom: 12px;
+      }
+      .sum {
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
+        margin-bottom: 14px;
+        font-size: 15px;
+      }
+      .sum div {
+        display: flex;
+        justify-content: space-between;
+        padding: 3px 0;
+      }
+      .sum .total {
+        font-weight: 700;
+        font-size: 17px;
+        border-top: 1px dashed var(--line);
+        margin-top: 6px;
+        padding-top: 8px;
+      }
+      #paypal-buttons {
+        min-height: 48px;
+      }
+      .sim {
+        display: block;
+        width: 100%;
+        border: 0;
+        border-radius: 24px;
+        background: #ffc439;
+        color: #253b80;
+        font:
+          700 16px 'DM Sans',
+          sans-serif;
+        padding: 13px;
+      }
+      .sim small {
+        display: block;
+        font-weight: 500;
+        font-size: 11px;
+        color: #3b4f7a;
+      }
 
-/* the link */
-.linkbox{display:flex;gap:8px;margin-top:22px}
-.linkbox input{flex:1;font-size:14px}
-.receipt{border:1px dashed var(--line);border-radius:12px;padding:10px 14px;margin-top:16px;font-size:14px;color:var(--muted)}
-.receipt b{display:block;color:var(--ink);font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.receipt div{display:flex;justify-content:space-between;padding:2px 0}
-.receipt .tot{color:var(--ink);font-weight:700;border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
-.receipt small{display:block;margin-top:6px;word-break:break-all}
-.done-note{font:italic 18px/1.4 'Cormorant Garamond',serif;color:var(--muted);text-align:center;margin-top:12px}
-.seal-mini{display:block;width:110px;height:110px;margin:20px auto 4px}
-</style>
-</head>
-<body>
-<div class="demo">Demo — PayPal sandbox, no real money.</div>
-<div class="app">
+      /* the link */
+      .linkbox {
+        display: flex;
+        gap: 8px;
+        margin-top: 22px;
+      }
+      .linkbox input {
+        flex: 1;
+        font-size: 14px;
+      }
+      .receipt {
+        border: 1px dashed var(--line);
+        border-radius: 12px;
+        padding: 10px 14px;
+        margin-top: 16px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .receipt b {
+        display: block;
+        color: var(--ink);
+        font-size: 13px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .receipt div {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+      }
+      .receipt .tot {
+        color: var(--ink);
+        font-weight: 700;
+        border-top: 1px solid var(--line);
+        margin-top: 4px;
+        padding-top: 6px;
+      }
+      .receipt small {
+        display: block;
+        margin-top: 6px;
+        word-break: break-all;
+      }
+      .done-note {
+        font:
+          italic 18px/1.4 'Cormorant Garamond',
+          serif;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 12px;
+      }
+      .seal-mini {
+        display: block;
+        width: 110px;
+        height: 110px;
+        margin: 20px auto 4px;
+      }
+      /* "reduce motion" in the system settings: things appear without moving */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo">Demo — PayPal sandbox, no real money.</div>
+    <div class="app">
+      <header class="top">
+        <div class="brand">Greetonata<span> ✳</span></div>
+        <div class="top-actions">
+          <div class="style-switch" role="group" aria-label="Style">
+            <button id="stClassic" class="on" onclick="setStyle(false)">Classic</button>
+            <button id="stCelestial" onclick="setStyle(true)">Celestial</button>
+          </div>
+          <button class="icon-btn" id="sound" aria-label="Sound on" onclick="toggleSound()">♫</button>
+        </div>
+      </header>
 
-<header class="top">
-  <div class="brand">Greetonata<span> ✳</span></div>
-  <div class="top-actions">
-    <div class="style-switch" role="group" aria-label="Style">
-      <button id="stClassic" class="on" onclick="setStyle(false)">Classic</button>
-      <button id="stCelestial" onclick="setStyle(true)">Celestial</button>
+      <div class="steps" id="steps"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+
+      <!-- I. OVERTURE -->
+      <section class="screen on" id="s1">
+        <div class="kicker">I · Overture</div>
+        <h1>Messages that<br /><em>bloom</em> into music.</h1>
+        <p class="intro">Your words become a flower and a melody — made for one person only.</p>
+        <div class="hero-art">
+          <div class="glow"></div>
+          <div class="orbit"></div>
+          <canvas class="hero-cv" id="heroCv" aria-hidden="true"></canvas>
+          <span class="note n1">♪</span><span class="note n2">♫</span><span class="note n3">✧</span
+          ><span class="note n4">♪</span>
+        </div>
+        <button class="primary" onclick="go(2)">Create a card</button>
+        <div class="values">
+          <div class="value"><b>❀</b>A flower</div>
+          <div class="value"><b>♫</b>A melody</div>
+          <div class="value"><b>✉</b>A keepsake</div>
+        </div>
+      </section>
+
+      <!-- II. THE OCCASION -->
+      <section class="screen" id="s2">
+        <button class="back" onclick="go(1)">← Back</button>
+        <div class="kicker">II · The Occasion</div>
+        <h2>What are we <em>celebrating?</em></h2>
+        <svg class="flourish" viewBox="0 0 180 16"><path d="M2 9 Q45 0 90 8 T178 7" /></svg>
+        <p class="sub">Pick one — each has its own colors and chord.</p>
+        <div class="occasions" id="occasions"></div>
+      </section>
+
+      <!-- III. FOR WHOM -->
+      <section class="screen" id="s3">
+        <button class="back" onclick="go(2)">← Back</button>
+        <div class="kicker">III · For Whom</div>
+        <h2>Who is this <em>melody</em> for?</h2>
+        <svg class="flourish" viewBox="0 0 180 16"><path d="M2 8 C35 14 50 1 90 8 S150 15 178 6" /></svg>
+        <div class="form">
+          <label for="to">To</label>
+          <input id="to" placeholder="Their name" maxlength="40" oninput="chk3()" />
+          <label for="from">From</label>
+          <input id="from" placeholder="Your name" maxlength="40" oninput="chk3()" />
+          <label for="rel">Who are they to you?</label>
+          <input id="rel" placeholder="e.g. sister, best friend, colleague" maxlength="60" />
+          <label for="det">A few details</label>
+          <textarea id="det" placeholder="e.g. turns 30, loves cats and travel" maxlength="400"></textarea>
+        </div>
+        <button class="primary mt" id="writeBtn" disabled onclick="writeDrafts()">Write drafts</button>
+        <p class="err" id="err3"></p>
+      </section>
+
+      <!-- IV. THE WORDS -->
+      <section class="screen" id="s4">
+        <button class="back" onclick="go(3)">← Back</button>
+        <div class="kicker">IV · The Words</div>
+        <h2>Pick a <em>letter</em></h2>
+        <p class="left" id="leftTxt"></p>
+        <p class="test" id="testNote" hidden>
+          Preview: sample text. On the site, real drafts are written by AI from your details.
+        </p>
+        <div class="letters" id="letters"></div>
+        <button class="secondary" id="againBtn" onclick="writeDrafts(true)">Write new drafts</button>
+        <p class="err" id="err4"></p>
+        <div class="form">
+          <label for="edit">Make it yours</label>
+          <textarea
+            id="edit"
+            style="min-height: 200px"
+            placeholder="Tap a letter above, then edit it here."
+            oninput="chk4()"
+          ></textarea>
+        </div>
+        <button class="primary mt" id="makeBtn" disabled onclick="makeCard()">Make my card</button>
+      </section>
+
+      <!-- V. THE CARD -->
+      <section class="screen" id="s5">
+        <button class="back" onclick="go(4)">← Back</button>
+        <div class="kicker">V · The Card</div>
+        <h2>Your <em>card</em></h2>
+        <div class="cardx warm" id="card">
+          <svg class="corner tl" viewBox="0 0 46 46">
+            <path
+              d="M4 42V12Q4 4 12 4h30M10 36V16q0-6 6-6h20M16 16q8 2 10 10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+            />
+            <circle cx="27" cy="27" r="2.2" fill="currentColor" />
+          </svg>
+          <svg class="corner tr" viewBox="0 0 46 46">
+            <path
+              d="M4 42V12Q4 4 12 4h30M10 36V16q0-6 6-6h20M16 16q8 2 10 10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+            />
+            <circle cx="27" cy="27" r="2.2" fill="currentColor" />
+          </svg>
+          <svg class="corner bl" viewBox="0 0 46 46">
+            <path
+              d="M4 42V12Q4 4 12 4h30M10 36V16q0-6 6-6h20M16 16q8 2 10 10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+            />
+            <circle cx="27" cy="27" r="2.2" fill="currentColor" />
+          </svg>
+          <svg class="corner br" viewBox="0 0 46 46">
+            <path
+              d="M4 42V12Q4 4 12 4h30M10 36V16q0-6 6-6h20M16 16q8 2 10 10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+            />
+            <circle cx="27" cy="27" r="2.2" fill="currentColor" />
+          </svg>
+          <canvas id="shape" role="img" aria-label="Your card"></canvas>
+          <div class="msg" id="msg"></div>
+          <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+        </div>
+        <button class="primary mt" id="play" onclick="play()">▶ Play the card</button>
+        <button class="secondary mt-s" onclick="go(4)">Edit text</button>
+        <p class="err" id="err5"></p>
+
+        <div class="pay">
+          <h3>Add a gift <em>(optional)</em></h3>
+          <div class="gifts" id="gifts">
+            <button data-g="0" class="on">No gift</button><button data-g="10">$10</button
+            ><button data-g="20">$20</button><button data-g="50">$50</button>
+          </div>
+          <p class="gift-note" id="giftNote">The gift travels inside the envelope.</p>
+          <div class="sum">
+            <div><span>Card</span><span>$2.99</span></div>
+            <div><span>Gift</span><span id="giftAmt">$0.00</span></div>
+            <div class="total"><span>Total</span><span id="totalAmt">$2.99</span></div>
+          </div>
+          <div id="paypal-buttons"></div>
+          <p class="err" id="errPay"></p>
+        </div>
+      </section>
+
+      <!-- VI. SEND: the private link -->
+      <section class="screen" id="s6">
+        <div class="kicker">VI · Send</div>
+        <h2>Your card is <em>ready</em></h2>
+        <canvas class="seal-mini" id="sealMini" aria-hidden="true"></canvas>
+        <p class="done-note" id="doneNote"></p>
+        <div class="receipt" id="receipt"></div>
+        <div class="linkbox"><input id="link" readonly onclick="this.select()" /></div>
+        <button class="primary mt" id="copyBtn" onclick="copyLink()">Copy link</button>
+        <button class="secondary mt-s" id="shareBtn" onclick="shareLink()">Share</button>
+      </section>
     </div>
-    <button class="icon-btn" id="sound" aria-label="Sound on" onclick="toggleSound()">♫</button>
-  </div>
-</header>
+    <script src="js/shapes.js"></script>
+    <script src="js/music.js"></script>
+    <script src="js/draw.js"></script>
+    <script src="js/desk.js"></script>
+    <script>
+      /* ================= state ================= */
+      Desk.setNotes({
+        s1: [
+          'I · Overture',
+          '<p>Greetonata turns a message into a one-of-a-kind card: <b>a flower drawn from its words</b> and <b>a melody composed from it</b>.</p>',
+        ],
+        s2: [
+          'II · The Occasion',
+          '<p>Each occasion has its own family of shapes: a birthday cake with its own candles, nine kinds of flowers, seven kinds of real snow crystals and six kinds of hearts, each with its own colours.</p>',
+        ],
+        s3: [
+          'III · For Whom',
+          '<p><b>AI</b> (Llama 3.3 on Groq) writes three drafts in three tones. Your details are used only for that request.</p>',
+        ],
+        s4: [
+          'IV · The Words',
+          '<p>With each draft the AI also picks <b>the key words</b>, <b>two colours</b> and <b>an energy level</b>. You can edit the text freely.</p>',
+        ],
+        s5: [
+          'V · The Card',
+          "<p>The tune begins with <b>the recipient's name</b> and ends with <b>yours</b>: every letter becomes a note. Key words get longer notes and glow.</p><p>Payment uses <b>PayPal Checkout</b> (Orders API). The optional gift goes into the envelope.</p>",
+        ],
+        s6: [
+          'VI · Send',
+          '<p>The card gets <b>a private link</b> that never expires. The recipient opens a sealed envelope and claims the gift through <b>PayPal Payouts</b>.</p>',
+        ],
+      });
+      Desk.notes('s1');
 
-<div class="steps" id="steps"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+      let occ = null,
+        celestial = false,
+        soundOn = true,
+        mood = 'warm',
+        cardText = '',
+        scene = null;
 
-<!-- I. OVERTURE -->
-<section class="screen on" id="s1">
-  <div class="kicker">I · Overture</div>
-  <h1>Messages that<br><em>bloom</em> into music.</h1>
-  <p class="intro">Your words become a flower and a melody — made for one person only.</p>
-  <div class="hero-art">
-    <div class="glow"></div><div class="orbit"></div>
-    <canvas class="hero-cv" id="heroCv" aria-hidden="true"></canvas>
-    <span class="note n1">♪</span><span class="note n2">♫</span><span class="note n3">✧</span><span class="note n4">♪</span>
-  </div>
-  <button class="primary" onclick="go(2)">Create a card</button>
-  <div class="values">
-    <div class="value"><b>❀</b>A flower</div><div class="value"><b>♫</b>A melody</div><div class="value"><b>✉</b>A keepsake</div>
-  </div>
-</section>
+      /* ================= home: a card shape drawing itself ================= */
+      const HERO = [
+        [
+          'birthday',
+          'warm',
+          'Dear Ana,\n\nHappy birthday! I hope this year brings you as much joy as you bring to everyone around you.\n\nWith love,\nMarko',
+        ],
+        [
+          'xmas',
+          'warm',
+          'Dear Grandpa Joe,\n\nMay your cookies stay soft and your lights stay untangled. Happy holidays!\n\nYours,\nLily',
+        ],
+        [
+          'thanks',
+          'warm',
+          'Dear Mrs. Novak,\n\nThank you for the patience and the kind words when I needed them most.\n\nWith gratitude,\nLuka',
+        ],
+        [
+          'celebration',
+          'festive',
+          'Dear Mila and Petar,\n\nCongratulations on your wedding! Here is to a lifetime of music together.\n\nCheers,\nJana',
+        ],
+      ];
+      const heroCv = document.getElementById('heroCv');
+      let heroIdx = 0,
+        heroEls = null,
+        heroFlames = null,
+        heroT0 = 0;
+      function heroShape() {
+        const keep = [occ, mood, scene, AI];
+        const [o, m, t] = HERO[heroIdx % HERO.length];
+        occ = o;
+        mood = m;
+        scene = null;
+        AI = null;
+        const sh = chooseShape(t);
+        heroEls = normT(sh.els);
+        heroFlames = sh.flames || null;
+        occ = keep[0];
+        mood = keep[1];
+        scene = keep[2];
+        AI = keep[3];
+      }
+      function heroFrame(now) {
+        if (document.getElementById('s1').classList.contains('on')) {
+          if (!heroEls) {
+            sizeCanvas(heroCv, heroCv.clientWidth || 240);
+            heroShape();
+            heroT0 = now;
+            heroCv.classList.remove('fade');
+          }
+          const el = (now - heroT0) / 1000;
+          const hc = heroCv.getContext('2d');
+          paint(hc, heroEls, clamp(el / 3.2), null);
+          if (heroFlames && el > 3.2)
+            drawFlames(hc, heroFlames, now / 1000, Math.min(1, (el - 3.2) / 0.3), 0);
+          if (el > 5.6 && !heroCv.classList.contains('fade')) heroCv.classList.add('fade');
+          if (el > 6.3) {
+            heroIdx++;
+            heroEls = null;
+          }
+        }
+        requestAnimationFrame(heroFrame);
+      }
+      requestAnimationFrame(heroFrame);
 
-<!-- II. THE OCCASION -->
-<section class="screen" id="s2">
-  <button class="back" onclick="go(1)">← Back</button>
-  <div class="kicker">II · The Occasion</div>
-  <h2>What are we <em>celebrating?</em></h2>
-  <svg class="flourish" viewBox="0 0 180 16"><path d="M2 9 Q45 0 90 8 T178 7"/></svg>
-  <p class="sub">Pick one — each has its own colors and chord.</p>
-  <div class="occasions" id="occasions"></div>
-</section>
-
-<!-- III. FOR WHOM -->
-<section class="screen" id="s3">
-  <button class="back" onclick="go(2)">← Back</button>
-  <div class="kicker">III · For Whom</div>
-  <h2>Who is this <em>melody</em> for?</h2>
-  <svg class="flourish" viewBox="0 0 180 16"><path d="M2 8 C35 14 50 1 90 8 S150 15 178 6"/></svg>
-  <div class="form">
-    <label for="to">To</label>
-    <input id="to" placeholder="Their name" maxlength="40" oninput="chk3()">
-    <label for="from">From</label>
-    <input id="from" placeholder="Your name" maxlength="40" oninput="chk3()">
-    <label for="rel">Who are they to you?</label>
-    <input id="rel" placeholder="e.g. sister, best friend, colleague" maxlength="60">
-    <label for="det">A few details</label>
-    <textarea id="det" placeholder="e.g. turns 30, loves cats and travel" maxlength="400"></textarea>
-  </div>
-  <button class="primary mt" id="writeBtn" disabled onclick="writeDrafts()">Write drafts</button>
-  <p class="err" id="err3"></p>
-</section>
-
-<!-- IV. THE WORDS -->
-<section class="screen" id="s4">
-  <button class="back" onclick="go(3)">← Back</button>
-  <div class="kicker">IV · The Words</div>
-  <h2>Pick a <em>letter</em></h2>
-  <p class="left" id="leftTxt"></p>
-  <p class="test" id="testNote" hidden>Preview: sample text. On the site, real drafts are written by AI from your details.</p>
-  <div class="letters" id="letters"></div>
-  <button class="secondary" id="againBtn" onclick="writeDrafts(true)">Write new drafts</button>
-  <p class="err" id="err4"></p>
-  <div class="form">
-    <label for="edit">Make it yours</label>
-    <textarea id="edit" style="min-height:200px" placeholder="Tap a letter above, then edit it here." oninput="chk4()"></textarea>
-  </div>
-  <button class="primary mt" id="makeBtn" disabled onclick="makeCard()">Make my card</button>
-</section>
-
-<!-- V. THE CARD -->
-<section class="screen" id="s5">
-  <button class="back" onclick="go(4)">← Back</button>
-  <div class="kicker">V · The Card</div>
-  <h2>Your <em>card</em></h2>
-  <div class="cardx warm" id="card">
-    <svg class="corner tl" viewBox="0 0 46 46"><path d="M4 42V12Q4 4 12 4h30M10 36V16q0-6 6-6h20M16 16q8 2 10 10" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="27" cy="27" r="2.2" fill="currentColor"/></svg>
-    <svg class="corner tr" viewBox="0 0 46 46"><path d="M4 42V12Q4 4 12 4h30M10 36V16q0-6 6-6h20M16 16q8 2 10 10" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="27" cy="27" r="2.2" fill="currentColor"/></svg>
-    <svg class="corner bl" viewBox="0 0 46 46"><path d="M4 42V12Q4 4 12 4h30M10 36V16q0-6 6-6h20M16 16q8 2 10 10" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="27" cy="27" r="2.2" fill="currentColor"/></svg>
-    <svg class="corner br" viewBox="0 0 46 46"><path d="M4 42V12Q4 4 12 4h30M10 36V16q0-6 6-6h20M16 16q8 2 10 10" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="27" cy="27" r="2.2" fill="currentColor"/></svg>
-    <canvas id="shape"></canvas>
-    <div class="msg" id="msg"></div>
-    <canvas class="fx" id="fx"></canvas>
-  </div>
-  <button class="primary mt" id="play" onclick="play()">▶ Play the card</button>
-  <button class="secondary mt-s" onclick="go(4)">Edit text</button>
-  <p class="err" id="err5"></p>
-
-  <div class="pay">
-    <h3>Add a gift <em>(optional)</em></h3>
-    <div class="gifts" id="gifts">
-      <button data-g="0" class="on">No gift</button><button data-g="10">$10</button><button data-g="20">$20</button><button data-g="50">$50</button>
-    </div>
-    <p class="gift-note" id="giftNote">The gift travels inside the envelope.</p>
-    <div class="sum">
-      <div><span>Card</span><span>$2.99</span></div>
-      <div><span>Gift</span><span id="giftAmt">$0.00</span></div>
-      <div class="total"><span>Total</span><span id="totalAmt">$2.99</span></div>
-    </div>
-    <div id="paypal-buttons"></div>
-    <p class="err" id="errPay"></p>
-  </div>
-</section>
-
-<!-- VI. SEND: the private link -->
-<section class="screen" id="s6">
-  <div class="kicker">VI · Send</div>
-  <h2>Your card is <em>ready</em></h2>
-  <canvas class="seal-mini" id="sealMini"></canvas>
-  <p class="done-note" id="doneNote"></p>
-  <div class="receipt" id="receipt"></div>
-  <div class="linkbox"><input id="link" readonly onclick="this.select()"></div>
-  <button class="primary mt" id="copyBtn" onclick="copyLink()">Copy link</button>
-  <button class="secondary mt-s" id="shareBtn" onclick="shareLink()">Share</button>
-</section>
-
-</div>
-<script src="js/engine.js"></script>
-<script src="js/desk.js"></script>
-<script>
-/* ================= state ================= */
-Desk.setNotes({
-  s1:['I · Overture','<p>Greetonata turns a message into a one-of-a-kind card: <b>a flower drawn from its words</b> and <b>a melody composed from it</b>.</p>'],
-  s2:['II · The Occasion','<p>Each occasion has its own family of shapes: a birthday cake with its own candles, nine kinds of flowers, seven kinds of real snow crystals and six kinds of hearts, each with its own colours.</p>'],
-  s3:['III · For Whom','<p><b>AI</b> (Llama 3.3 on Groq) writes three drafts in three tones. Your details are used only for that request.</p>'],
-  s4:['IV · The Words','<p>With each draft the AI also picks <b>the key words</b>, <b>two colours</b> and <b>an energy level</b>. You can edit the text freely.</p>'],
-  s5:['V · The Card','<p>The tune begins with <b>the recipient\'s name</b> and ends with <b>yours</b>: every letter becomes a note. Key words get longer notes and glow.</p><p>Payment uses <b>PayPal Checkout</b> (Orders API). The optional gift goes into the envelope.</p>'],
-  s6:['VI · Send','<p>The card gets <b>a private link</b> that never expires. The recipient opens a sealed envelope and claims the gift through <b>PayPal Payouts</b>.</p>']});
-Desk.notes('s1');
-
-let occ=null, celestial=false, soundOn=true, mood='warm', cardText='', scene=null;
-
-/* ================= home: a card shape drawing itself ================= */
-const HERO=[
-  ['birthday','warm',"Dear Ana,\n\nHappy birthday! I hope this year brings you as much joy as you bring to everyone around you.\n\nWith love,\nMarko"],
-  ['xmas','warm',"Dear Grandpa Joe,\n\nMay your cookies stay soft and your lights stay untangled. Happy holidays!\n\nYours,\nLily"],
-  ['thanks','warm',"Dear Mrs. Novak,\n\nThank you for the patience and the kind words when I needed them most.\n\nWith gratitude,\nLuka"],
-  ['celebration','festive',"Dear Mila and Petar,\n\nCongratulations on your wedding! Here is to a lifetime of music together.\n\nCheers,\nJana"]];
-const heroCv=document.getElementById('heroCv');let heroIdx=0,heroEls=null,heroFlames=null,heroT0=0;
-function heroShape(){
-  const keep=[occ,mood,scene,AI];const[o,m,t]=HERO[heroIdx%HERO.length];occ=o;mood=m;scene=null;AI=null;
-  const sh=chooseShape(t);heroEls=normT(sh.els);heroFlames=sh.flames||null;occ=keep[0];mood=keep[1];scene=keep[2];AI=keep[3];
-}
-function heroFrame(now){
-  if(document.getElementById('s1').classList.contains('on')){
-    if(!heroEls){sizeCanvas(heroCv,heroCv.clientWidth||240);heroShape();heroT0=now;heroCv.classList.remove('fade');}
-    const el=(now-heroT0)/1000;
-    const hc=heroCv.getContext('2d');paint(hc,heroEls,clamp(el/3.2),null);
-    if(heroFlames&&el>3.2)drawFlames(hc,heroFlames,now/1000,Math.min(1,(el-3.2)/.3),0);
-    if(el>5.6&&!heroCv.classList.contains('fade'))heroCv.classList.add('fade');
-    if(el>6.3){heroIdx++;heroEls=null;}
-  }
-  requestAnimationFrame(heroFrame);
-}
-requestAnimationFrame(heroFrame);
-
-/* ================= occasions (screen II) ================= */
-const OCC={
-  birthday:   {name:"Birthday",            cap:"Make their day shine",   shape:"cake",   art:"a-birthday",
-               classic:["#d97861","#f2d5c5"], celestial:["#e89a85","#70506c"], chord:[523.25,659.25,783.99]},
-  celebration:{name:"Celebration",         cap:"Weddings, babies & more",shape:"flower2",art:"a-celebration",
-               classic:["#c7708f","#f1d3dc"], celestial:["#e3a0bd","#6a4a6e"], chord:[587.33,739.99,880]},
-  xmas:       {name:"Christmas & New Year",cap:"Warm wishes, bright days",shape:"snow",  art:"a-xmas",
-               classic:["#4f7d55","#d8e6cf"], celestial:["#8fc49a","#3f5e58"], chord:[392,493.88,587.33]},
-  thanks:     {name:"Thank you",           cap:"Small words, big hearts",shape:"heart", art:"a-thanks",
-               classic:["#d98a3d","#f5dcc0"], celestial:["#f0b06a","#6e5440"], chord:[440,554.37,659.25]}
-};
-function occArt(shape){
-  const s='stroke="#a66f39" stroke-width="1.5"';
-  if(shape==="cake") return `<svg viewBox="0 0 120 120" fill="none" ${s} stroke-linejoin="round">
+      /* ================= occasions (screen II) ================= */
+      const OCC = {
+        birthday: {
+          name: 'Birthday',
+          cap: 'Make their day shine',
+          shape: 'cake',
+          art: 'a-birthday',
+          classic: ['#d97861', '#f2d5c5'],
+          celestial: ['#e89a85', '#70506c'],
+          chord: [523.25, 659.25, 783.99],
+        },
+        celebration: {
+          name: 'Celebration',
+          cap: 'Weddings, babies & more',
+          shape: 'flower2',
+          art: 'a-celebration',
+          classic: ['#c7708f', '#f1d3dc'],
+          celestial: ['#e3a0bd', '#6a4a6e'],
+          chord: [587.33, 739.99, 880],
+        },
+        xmas: {
+          name: 'Christmas & New Year',
+          cap: 'Warm wishes, bright days',
+          shape: 'snow',
+          art: 'a-xmas',
+          classic: ['#4f7d55', '#d8e6cf'],
+          celestial: ['#8fc49a', '#3f5e58'],
+          chord: [392, 493.88, 587.33],
+        },
+        thanks: {
+          name: 'Thank you',
+          cap: 'Small words, big hearts',
+          shape: 'heart',
+          art: 'a-thanks',
+          classic: ['#d98a3d', '#f5dcc0'],
+          celestial: ['#f0b06a', '#6e5440'],
+          chord: [440, 554.37, 659.25],
+        },
+      };
+      function occArt(shape) {
+        const s = 'stroke="#a66f39" stroke-width="1.5"';
+        if (shape === 'cake')
+          return `<svg viewBox="0 0 120 120" fill="none" ${s} stroke-linejoin="round">
     <ellipse cx="60" cy="96" rx="44" ry="7" fill="#f6e6d4"/>
     <path d="M22 70v22c0 4 17 7 38 7s38-3 38-7V70" fill="#ec9c8a"/><ellipse cx="60" cy="70" rx="38" ry="7" fill="#fbe3d2"/>
     <path d="M22 72c4 6 8 6 10 0s7 7 10 0 7 7 10 0 7 7 10 0 7 7 10 0 7 7 10 0" fill="none"/>
     <path d="M36 50v18c0 3 11 5 24 5s24-2 24-5V50" fill="#f4c887"/><ellipse cx="60" cy="50" rx="24" ry="5" fill="#fff1d6"/>
     <path d="M60 45V31" stroke-width="5" stroke="#e88b70"/><path d="M60 31v-4" stroke="#5a4030"/>
     <path d="M60 27c4-4 3-9 0-13-3 4-4 9 0 13z" fill="#ffc94a" stroke="#e8902a"/></svg>`;
-  if(shape==="flower2") return `<svg viewBox="0 0 120 120" fill="none" ${s}>
+        if (shape === 'flower2')
+          return `<svg viewBox="0 0 120 120" fill="none" ${s}>
     <path d="M60 60C39 48 43 22 60 30C77 18 84 45 60 60Z" fill="#e8a7a4"/><path d="M60 60C72 36 99 41 90 60C99 78 74 84 60 60Z" fill="#d7a3c7"/>
     <path d="M60 60C84 73 78 98 60 90C42 98 36 74 60 60Z" fill="#efc77d"/><path d="M60 60C47 84 21 78 30 60C20 42 45 36 60 60Z" fill="#e9b2a1"/>
     <circle cx="60" cy="60" r="9" fill="#d6aa56"/><path d="M17 20l5 8m-9-2 10-4M100 20l-5 8m9-2-10-4M18 97l7-5m-1 10-5-10M102 97l-7-5m1 10 5-10"/></svg>`;
-  if(shape==="snow"){let g='';for(let i=0;i<6;i++)g+=`<g transform="rotate(${i*60} 60 60)"><path d="M60 60V16"/><path d="M60 30l-9-9M60 30l9-9M60 44l-7-7M60 44l7-7"/><circle cx="60" cy="14" r="3" fill="#c75d4d" stroke="none"/></g>`;
-    return `<svg viewBox="0 0 120 120" fill="none" stroke="#54724d" stroke-width="2" stroke-linecap="round">${g}<circle cx="60" cy="60" r="8" fill="#d9b66d" stroke="#b68a43"/></svg>`;}
-  return `<svg viewBox="0 0 120 120" fill="none" ${s}>
+        if (shape === 'snow') {
+          let g = '';
+          for (let i = 0; i < 6; i++)
+            g += `<g transform="rotate(${i * 60} 60 60)"><path d="M60 60V16"/><path d="M60 30l-9-9M60 30l9-9M60 44l-7-7M60 44l7-7"/><circle cx="60" cy="14" r="3" fill="#c75d4d" stroke="none"/></g>`;
+          return `<svg viewBox="0 0 120 120" fill="none" stroke="#54724d" stroke-width="2" stroke-linecap="round">${g}<circle cx="60" cy="60" r="8" fill="#d9b66d" stroke="#b68a43"/></svg>`;
+        }
+        return `<svg viewBox="0 0 120 120" fill="none" ${s}>
     <path d="M60 98C34 80 16 64 16 42C16 26 28 16 41 16C50 16 56 21 60 28C64 21 70 16 79 16C92 16 104 26 104 42C104 64 86 80 60 98Z" fill="#e8a05d"/>
     <path d="M60 84C42 72 30 61 30 45C30 36 36 30 43 30C50 30 55 35 60 43C65 35 70 30 77 30C84 30 90 36 90 45C90 61 78 72 60 84Z" fill="#f2c983"/>
     <circle cx="60" cy="54" r="7" fill="#c88745"/></svg>`;
-}
-const occBox=document.getElementById('occasions');let occTimer=0;
-Object.entries(OCC).forEach(([k,o])=>{
-  const b=document.createElement('button');b.className='occ';
-  b.innerHTML=`<div class="art ${o.art}">${occArt(o.shape)}</div><strong>${o.name}</strong><small>${o.cap}</small>`;
-  b.onclick=()=>{if(occ!==k)resetDrafts();occ=k;occBox.querySelectorAll('.occ').forEach(x=>x.classList.toggle('sel',x===b));applyColors();chord(o.chord);clearTimeout(occTimer);occTimer=setTimeout(()=>go(3),600);};
-  occBox.appendChild(b);
-});
+      }
+      const occBox = document.getElementById('occasions');
+      let occTimer = 0;
+      Object.entries(OCC).forEach(([k, o]) => {
+        const b = document.createElement('button');
+        b.className = 'occ';
+        b.innerHTML = `<div class="art ${o.art}">${occArt(o.shape)}</div><strong>${o.name}</strong><small>${o.cap}</small>`;
+        b.onclick = () => {
+          if (occ !== k) resetDrafts();
+          occ = k;
+          occBox.querySelectorAll('.occ').forEach(x => x.classList.toggle('sel', x === b));
+          applyColors();
+          chord(o.chord);
+          clearTimeout(occTimer);
+          occTimer = setTimeout(() => go(3), 600);
+        };
+        occBox.appendChild(b);
+      });
 
-/* ================= style & page colors ================= */
-function applyColors(){
-  const o=occ?OCC[occ]:null;
-  const [a,soft]=o?(celestial?o.celestial:o.classic):(celestial?["#e6a56e","#70506c"]:["#d97861","#f2d5c5"]);
-  document.body.style.setProperty('--accent',a);
-  document.body.style.setProperty('--accent-soft',soft);
-}
-function setStyle(c){
-  celestial=c;document.body.classList.toggle('celestial',c);
-  document.getElementById('stClassic').classList.toggle('on',!c);
-  document.getElementById('stCelestial').classList.toggle('on',c);
-  applyColors();ping(c?783.99:587.33,.3);heroEls=null;
-  if(document.getElementById('s5').classList.contains('on'))renderCard();
-}
+      /* ================= style & page colors ================= */
+      function applyColors() {
+        const o = occ ? OCC[occ] : null;
+        const [a, soft] = o
+          ? celestial
+            ? o.celestial
+            : o.classic
+          : celestial
+            ? ['#e6a56e', '#70506c']
+            : ['#d97861', '#f2d5c5'];
+        document.body.style.setProperty('--accent', a);
+        document.body.style.setProperty('--accent-soft', soft);
+      }
+      function setStyle(c) {
+        celestial = c;
+        document.body.classList.toggle('celestial', c);
+        document.getElementById('stClassic').classList.toggle('on', !c);
+        document.getElementById('stCelestial').classList.toggle('on', c);
+        applyColors();
+        ping(c ? 783.99 : 587.33, 0.3);
+        heroEls = null;
+        if (document.getElementById('s5').classList.contains('on')) renderCard();
+      }
 
-/* ================= interface sound: soft music-box tone ================= */
-let uiCtx=null;
-function ping(f,d=.35){
-  if(!soundOn)return;
-  try{
-    uiCtx=uiCtx||new(window.AudioContext||window.webkitAudioContext)();
-    if(uiCtx.state==='suspended')uiCtx.resume();
-    const t=uiCtx.currentTime,g=uiCtx.createGain();g.connect(uiCtx.destination);
-    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.14,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
-    [[1,'sine'],[2,'triangle']].forEach(([m,type],i)=>{
-      const o=uiCtx.createOscillator(),og=uiCtx.createGain();o.type=type;o.frequency.value=f*m;og.gain.value=i?.18:1;
-      o.connect(og);og.connect(g);o.start(t);o.stop(t+d+.05);
-    });
-  }catch(e){}
-}
-function chord(c){c.forEach((f,i)=>setTimeout(()=>ping(f,.6),i*110))}
-function toggleSound(){soundOn=!soundOn;const b=document.getElementById('sound');b.textContent=soundOn?'♫':'♪';b.style.opacity=soundOn?1:.45;b.setAttribute('aria-label',soundOn?'Sound on':'Sound off');if(soundOn)ping(659.25,.25);else stopCard(true);}
+      /* ================= interface sound: soft music-box tone ================= */
+      let uiCtx = null;
+      function ping(f, d = 0.35) {
+        if (!soundOn) return;
+        try {
+          uiCtx = uiCtx || new (window.AudioContext || window.webkitAudioContext)();
+          if (uiCtx.state === 'suspended') uiCtx.resume();
+          const t = uiCtx.currentTime,
+            g = uiCtx.createGain();
+          g.connect(uiCtx.destination);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.14, t + 0.01);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+          [
+            [1, 'sine'],
+            [2, 'triangle'],
+          ].forEach(([m, type], i) => {
+            const o = uiCtx.createOscillator(),
+              og = uiCtx.createGain();
+            o.type = type;
+            o.frequency.value = f * m;
+            og.gain.value = i ? 0.18 : 1;
+            o.connect(og);
+            og.connect(g);
+            o.start(t);
+            o.stop(t + d + 0.05);
+          });
+        } catch (e) {}
+      }
+      function chord(c) {
+        c.forEach((f, i) => setTimeout(() => ping(f, 0.6), i * 110));
+      }
+      function toggleSound() {
+        soundOn = !soundOn;
+        const b = document.getElementById('sound');
+        b.textContent = soundOn ? '♫' : '♪';
+        b.style.opacity = soundOn ? 1 : 0.45;
+        b.setAttribute('aria-label', soundOn ? 'Sound on' : 'Sound off');
+        if (soundOn) ping(659.25, 0.25);
+        else stopCard(true);
+      }
 
-/* ================= navigation ================= */
-function go(n){
-  if(n!==5)stopCard(false);
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
-  document.getElementById('s'+n).classList.add('on');
-  document.querySelectorAll('#steps i').forEach((d,i)=>d.classList.toggle('on',i===n-1));
-  if(n<5)applyColors();
-  if(n<6)ping([392,523.25,587.33,659.25,783.99][n-1],.3);
-  Desk.notes('s'+n);if(n!==5)Desk.idle();
-  scrollTo(0,0);
-}
-const val=id=>document.getElementById(id).value.trim();
-/* "fiona" → "Fiona", "mrs. novak" → "Mrs. Novak" (only lowercase first letters change) */
-const nameCase=s=>s.replace(/(^|[\s\-'.])(\p{Ll})/gu,(m,a,b)=>a+b.toUpperCase());
-['to','from'].forEach(id=>document.getElementById(id).addEventListener('blur',e=>{e.target.value=nameCase(e.target.value.trim());}));
-function chk3(){document.getElementById('writeBtn').disabled=!(val('to')&&val('from'))}
-function chk4(){document.getElementById('makeBtn').disabled=!val('edit')}
+      /* ================= navigation ================= */
+      function go(n) {
+        if (n !== 5) stopCard(false);
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+        document.getElementById('s' + n).classList.add('on');
+        document.querySelectorAll('#steps i').forEach((d, i) => d.classList.toggle('on', i === n - 1));
+        if (n < 5) applyColors();
+        if (n < 6) ping([392, 523.25, 587.33, 659.25, 783.99][n - 1], 0.3);
+        Desk.notes('s' + n);
+        if (n !== 5) Desk.idle();
+        scrollTo(0, 0);
+      }
+      const val = id => document.getElementById(id).value.trim();
+      /* "fiona" → "Fiona", "mrs. novak" → "Mrs. Novak" (only lowercase first letters change) */
+      const nameCase = s => s.replace(/(^|[\s\-'.])(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
+      ['to', 'from'].forEach(id =>
+        document.getElementById(id).addEventListener('blur', e => {
+          e.target.value = nameCase(e.target.value.trim());
+        }),
+      );
+      function chk3() {
+        document.getElementById('writeBtn').disabled = !(val('to') && val('from'));
+      }
+      function chk4() {
+        document.getElementById('makeBtn').disabled = !val('edit');
+      }
 
-/* ================= drafts (screen IV) ================= */
-const ROUNDS=3; let used=0, pickedMood='warm', pickedAI=null;
-function resetDrafts(){used=0;document.getElementById('letters').innerHTML='';document.getElementById('edit').value='';chk4();}
-function sampleDrafts(to,from,rel){
-  const r=rel||"friend";
-  const T={
-    birthday:[`Happy birthday! Having you as my ${r} is one of the best gifts I've ever had. I hope this year is as kind to you as you are to everyone around you.`,
-              `Another year older, and somehow still cooler than me. I'd say slow down, but we both know you won't. Have a fantastic birthday!`,
-              `Here's to you, to a brand-new year of your life, and to every adventure still waiting. Raise a glass today — you deserve it.`],
-    celebration:[`I'm so happy for you. Moments like this don't come every day, and nobody deserves it more than my ${r}.`,
-              `Look at you! I always knew you'd pull it off — I just didn't expect to be this emotional about it. Congratulations!`,
-              `Congratulations on this wonderful day! May it be the start of something even more beautiful.`],
-    xmas:[`Merry Christmas and a happy New Year! I'm grateful to have you as my ${r}, and I wish you a peaceful, cozy holiday.`,
-              `May your cookies stay soft, your lights stay untangled, and your resolutions last at least a week. Happy holidays!`,
-              `Wishing you a sparkling Christmas and a New Year full of joy, health and bright surprises.`],
-    thanks:[`Thank you — truly. You've been there when it mattered, and I don't say often enough how much that means to me.`,
-              `I owe you one. Okay, maybe several. Thank you for being the best ${r} anyone could ask for.`,
-              `A big, heartfelt thank you! Your kindness made a real difference, and I'm lucky to know you.`]};
-  const close=["With love,","Yours,","Cheers,"];
-  return ["Warm","Playful","Festive"].map((tone,i)=>{const body=T[occ][(i+used-1)%3];
-    const keywords=(body.toLowerCase().match(/[a-z']{6,}/g)||[]).slice(0,3);
-    return{tone,text:`Dear ${to},\n\n${body}\n\n${close[i]}\n${from}`,ai:{keywords,palette:[],energy:[2,4,3][i]}};});
-}
-async function fetchDrafts(){
-  const r=await fetch('/api/drafts',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({occasion:occ,to:val('to'),from:val('from'),relation:val('rel'),details:val('det'),round:used})});
-  const data=await r.json().catch(()=>null);
-  if(!r.ok||!data||!Array.isArray(data.drafts))throw Object.assign(new Error('failed'),{server:true});
-  return data.drafts;
-}
-const ORN=["❦","✧","❀"], WAX=["♡","♪","✳"];
-async function writeDrafts(again){
-  if(used>=ROUNDS)return;
-  ['to','from'].forEach(id=>{const el=document.getElementById(id);el.value=nameCase(el.value.trim());});
-  const btn=document.getElementById(again?'againBtn':'writeBtn'),errEl=document.getElementById(again?'err4':'err3'),label=btn.textContent;
-  btn.disabled=true;btn.textContent='Writing…';errEl.textContent='';
-  used++;
-  let drafts,sample=false;
-  try{drafts=await fetchDrafts();}
-  catch(e){
-    if(location.protocol==='file:'||location.protocol==='content:'||!e.server){drafts=sampleDrafts(val('to'),val('from'),val('rel'));sample=true;}
-    else{used--;btn.disabled=false;btn.textContent=label;errEl.textContent='The drafts could not be written right now. Please try again.';return;}
-  }
-  btn.textContent=label;btn.disabled=false;chk3();
-  document.getElementById('testNote').hidden=!sample;
-  const wrap=document.getElementById('letters');wrap.innerHTML='';wrap.classList.remove('deal');void wrap.offsetWidth;wrap.classList.add('deal');
-  drafts.slice(0,3).forEach((d,i)=>{
-    const el=document.createElement('button');el.className='letter';
-    const body=d.text.split('\n\n')[1]||d.text;
-    el.innerHTML=`<span class="tone"></span><span class="orn">${ORN[i]}</span><p></p><span class="wax">${WAX[i]}</span>`;
-    el.querySelector('.tone').textContent=d.tone;el.querySelector('p').textContent=body;
-    el.onclick=()=>{wrap.querySelectorAll('.letter').forEach(x=>x.classList.toggle('sel',x===el));
-      document.getElementById('edit').value=d.text;pickedMood=(d.tone||'warm').toLowerCase();pickedAI=d.ai||null;chk4();ping([587.33,698.46,783.99][i],.4)};
-    wrap.appendChild(el);
-  });
-  document.getElementById('edit').value='';
-  const left=ROUNDS-used;
-  document.getElementById('leftTxt').textContent=`Free drafts left: ${left} of ${ROUNDS}`;
-  document.getElementById('againBtn').disabled=left<=0;
-  chk4();
-  if(!again)go(4);else{chord([523.25,659.25,783.99]);scrollTo({top:0,behavior:'smooth'})}
-}
+      /* ================= drafts (screen IV) ================= */
+      const ROUNDS = 3;
+      let used = 0,
+        pickedMood = 'warm',
+        pickedAI = null;
+      function resetDrafts() {
+        used = 0;
+        document.getElementById('letters').innerHTML = '';
+        document.getElementById('edit').value = '';
+        chk4();
+      }
+      function sampleDrafts(to, from, rel) {
+        const r = rel || 'friend';
+        const T = {
+          birthday: [
+            `Happy birthday! Having you as my ${r} is one of the best gifts I've ever had. I hope this year is as kind to you as you are to everyone around you.`,
+            `Another year older, and somehow still cooler than me. I'd say slow down, but we both know you won't. Have a fantastic birthday!`,
+            `Here's to you, to a brand-new year of your life, and to every adventure still waiting. Raise a glass today — you deserve it.`,
+          ],
+          celebration: [
+            `I'm so happy for you. Moments like this don't come every day, and nobody deserves it more than my ${r}.`,
+            `Look at you! I always knew you'd pull it off — I just didn't expect to be this emotional about it. Congratulations!`,
+            `Congratulations on this wonderful day! May it be the start of something even more beautiful.`,
+          ],
+          xmas: [
+            `Merry Christmas and a happy New Year! I'm grateful to have you as my ${r}, and I wish you a peaceful, cozy holiday.`,
+            `May your cookies stay soft, your lights stay untangled, and your resolutions last at least a week. Happy holidays!`,
+            `Wishing you a sparkling Christmas and a New Year full of joy, health and bright surprises.`,
+          ],
+          thanks: [
+            `Thank you — truly. You've been there when it mattered, and I don't say often enough how much that means to me.`,
+            `I owe you one. Okay, maybe several. Thank you for being the best ${r} anyone could ask for.`,
+            `A big, heartfelt thank you! Your kindness made a real difference, and I'm lucky to know you.`,
+          ],
+        };
+        const close = ['With love,', 'Yours,', 'Cheers,'];
+        return ['Warm', 'Playful', 'Festive'].map((tone, i) => {
+          const body = T[occ][(i + used - 1) % 3];
+          const keywords = (body.toLowerCase().match(/[a-z']{6,}/g) || []).slice(0, 3);
+          return {
+            tone,
+            text: `Dear ${to},\n\n${body}\n\n${close[i]}\n${from}`,
+            ai: { keywords, palette: [], energy: [2, 4, 3][i] },
+          };
+        });
+      }
+      async function fetchDrafts() {
+        const r = await fetch('/api/drafts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            occasion: occ,
+            to: val('to'),
+            from: val('from'),
+            relation: val('rel'),
+            details: val('det'),
+            round: used,
+          }),
+        });
+        const data = await r.json().catch(() => null);
+        if (!r.ok || !data || !Array.isArray(data.drafts))
+          throw Object.assign(new Error('failed'), { server: true });
+        return data.drafts;
+      }
+      const ORN = ['❦', '✧', '❀'],
+        WAX = ['♡', '♪', '✳'];
+      async function writeDrafts(again) {
+        if (used >= ROUNDS) return;
+        ['to', 'from'].forEach(id => {
+          const el = document.getElementById(id);
+          el.value = nameCase(el.value.trim());
+        });
+        const btn = document.getElementById(again ? 'againBtn' : 'writeBtn'),
+          errEl = document.getElementById(again ? 'err4' : 'err3'),
+          label = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Writing…';
+        errEl.textContent = '';
+        used++;
+        let drafts,
+          sample = false;
+        try {
+          drafts = await fetchDrafts();
+        } catch (e) {
+          if (location.protocol === 'file:' || location.protocol === 'content:' || !e.server) {
+            drafts = sampleDrafts(val('to'), val('from'), val('rel'));
+            sample = true;
+          } else {
+            used--;
+            btn.disabled = false;
+            btn.textContent = label;
+            errEl.textContent = 'The drafts could not be written right now. Please try again.';
+            return;
+          }
+        }
+        btn.textContent = label;
+        btn.disabled = false;
+        chk3();
+        document.getElementById('testNote').hidden = !sample;
+        const wrap = document.getElementById('letters');
+        wrap.innerHTML = '';
+        wrap.classList.remove('deal');
+        void wrap.offsetWidth;
+        wrap.classList.add('deal');
+        drafts.slice(0, 3).forEach((d, i) => {
+          const el = document.createElement('button');
+          el.className = 'letter';
+          const body = d.text.split('\n\n')[1] || d.text;
+          el.innerHTML = `<span class="tone"></span><span class="orn">${ORN[i]}</span><p></p><span class="wax">${WAX[i]}</span>`;
+          el.querySelector('.tone').textContent = d.tone;
+          el.querySelector('p').textContent = body;
+          el.onclick = () => {
+            wrap.querySelectorAll('.letter').forEach(x => x.classList.toggle('sel', x === el));
+            document.getElementById('edit').value = d.text;
+            pickedMood = (d.tone || 'warm').toLowerCase();
+            pickedAI = d.ai || null;
+            chk4();
+            ping([587.33, 698.46, 783.99][i], 0.4);
+          };
+          wrap.appendChild(el);
+        });
+        document.getElementById('edit').value = '';
+        const left = ROUNDS - used;
+        document.getElementById('leftTxt').textContent = `Free drafts left: ${left} of ${ROUNDS}`;
+        document.getElementById('againBtn').disabled = left <= 0;
+        chk4();
+        if (!again) go(4);
+        else {
+          chord([523.25, 659.25, 783.99]);
+          scrollTo({ top: 0, behavior: glide() });
+        }
+      }
 
-/* ================= the card (screen V) ================= */
-const cv=document.getElementById('shape'),msgEl=document.getElementById('msg'),cardEl=document.getElementById('card');
-const fx=makeFx(document.getElementById('fx'));
-let spans=[],playing=null,raf=0,wish=makeWish();
-const nowS=()=>performance.now()/1000;
-function renderCard(){
-  stopCard(false);
-  cardEl.className='cardx '+mood;
-  sizeCanvas(cv,cv.clientWidth||300);
-  scene={ctx:cv.getContext('2d'),...chooseShape(cardText)};normT(scene.els);
-  document.body.style.setProperty('--accent',scene.accent);
-  spans=fillMessage(msgEl,cardText,false);wish=makeWish();
-  paintCard(scene,1,wish,nowS());
-  sizeFx(fx);fx.parts=[];fx.on=true;
-}
-function makeCard(){
-  cardText=val('edit');mood=['warm','playful','festive'].includes(pickedMood)?pickedMood:'warm';AI=pickedAI;
-  loadPiano().catch(()=>{});   // wake the sound up inside this tap: iPhones only allow audio that starts from a tap
-  go(5);renderCard();updateTotal();setupPaypal();
-  setTimeout(()=>{if(!playing)play();},450);       // the card starts to play by itself
-}
-function stopCard(redraw){
-  if(playing){playing.srcs.forEach(s=>{try{s.stop()}catch(e){}});playing=null;}
-  cancelAnimationFrame(raf);
-  spans.forEach(s=>s.classList.remove('wait','now'));
-  document.getElementById('play').textContent='▶ Play the card';
-  if(redraw&&scene)paintCard(scene,1,wish,nowS());
-}
-async function play(){
-  if(playing){stopCard(true);return;}
-  const btn=document.getElementById('play'),err=document.getElementById('err5');err.textContent='';
-  btn.disabled=true;btn.textContent='Loading piano…';
-  try{await loadPiano();}catch(e){btn.disabled=false;btn.textContent='▶ Play the card';err.textContent='The piano could not load. Please try again.';return;}
-  btn.disabled=false;btn.textContent='■ Stop';cardToTop(cardEl);
-  const song=compose(cardText),t0=actx.currentTime+.25,srcs=[];
-  for(const n of[...song.notes,...song.bass,...song.fin])srcs.push(key(n.midi,t0+n.t,n.dur,soundOn?n.vol:0));
-  playing={srcs};Desk.score(song,()=>actx.currentTime-t0);
-  spans.forEach(s=>{s.classList.add('wait');s.classList.remove('key');});wish=makeWish();
-  const tick=()=>{
-    if(!playing)return;
-    const el=actx.currentTime-t0,p=clamp(el/song.total);
-    wish.lit=p>=.97?Math.min(1,(p-.97)/.03):0;
-    paintCard(scene,p,wish,nowS());
-    for(const w of song.words){const s=spans[w.word];if(!s)continue;
-      if(el>=w.t){if(s.classList.contains('wait')){emitEdge(fx,w.key?5:(mood==='warm'?1:2));if(w.key)s.classList.add('key');followWord(s);}s.classList.remove('wait');s.classList.toggle('now',el<w.t+.45);}}
-    if(el<song.total+.6)raf=requestAnimationFrame(tick);
-    else{playing=null;spans.forEach(s=>s.classList.remove('wait','now'));btn.textContent='▶ Play again';if(scene.flames)wish.lit=1;}
-  };
-  raf=requestAnimationFrame(tick);
-}
-/* sparkles keep twinkling while the card is on screen */
-let fxLast=0,idleAcc=0;
-function fxLoop(now){
-  const dt=Math.min(.05,(now-(fxLast||now))/1000);fxLast=now;
-  if(fx.on&&document.getElementById('s5').classList.contains('on')){
-    if(!playing){idleAcc+=dt*IDLE_RATE[mood];while(idleAcc>=1){emitEdge(fx,1);idleAcc--;}
-      if(scene&&scene.flames&&(wish.lit||(wish.blownAt>=0&&nowS()-wish.blownAt<3)))paintCard(scene,1,wish,nowS());}
-    fxStep(fx,dt);
-  }
-  requestAnimationFrame(fxLoop);
-}
-requestAnimationFrame(fxLoop);
-window.addEventListener('resize',()=>{if(fx.on)sizeFx(fx);});
-/* tap the candles to blow them out */
-cv.addEventListener('click',()=>{if(blowCandles(wish,nowS())){for(let i=0;i<12;i++)setTimeout(()=>emitEdge(fx,2),i*70);chord([523.25,659.25,783.99,1046.5]);}});
+      /* ================= the card (screen V) ================= */
+      const cv = document.getElementById('shape'),
+        msgEl = document.getElementById('msg'),
+        cardEl = document.getElementById('card');
+      const fx = makeFx(document.getElementById('fx'));
+      let spans = [],
+        playing = null,
+        raf = 0,
+        wish = makeWish();
+      const nowS = () => performance.now() / 1000;
+      function renderCard() {
+        stopCard(false);
+        cardEl.className = 'cardx ' + mood;
+        sizeCanvas(cv, cv.clientWidth || 300);
+        scene = { ctx: cv.getContext('2d'), ...chooseShape(cardText) };
+        normT(scene.els);
+        cv.setAttribute('aria-label', describeShape(scene, nameCase(val('to'))));
+        document.body.style.setProperty('--accent', scene.accent);
+        spans = fillMessage(msgEl, cardText, false);
+        wish = makeWish();
+        paintCard(scene, 1, wish, nowS());
+        sizeFx(fx);
+        fx.parts = [];
+        fx.on = true;
+      }
+      function makeCard() {
+        cardText = val('edit');
+        mood = ['warm', 'playful', 'festive'].includes(pickedMood) ? pickedMood : 'warm';
+        AI = pickedAI;
+        loadPiano().catch(() => {}); // wake the sound up inside this tap: iPhones only allow audio that starts from a tap
+        go(5);
+        renderCard();
+        updateTotal();
+        setupPaypal();
+        setTimeout(() => {
+          if (!playing) play();
+        }, 450); // the card starts to play by itself
+      }
+      function stopCard(redraw) {
+        if (playing) {
+          playing.srcs.forEach(s => {
+            try {
+              s.stop();
+            } catch (e) {}
+          });
+          playing = null;
+        }
+        cancelAnimationFrame(raf);
+        spans.forEach(s => s.classList.remove('wait', 'now'));
+        document.getElementById('play').textContent = '▶ Play the card';
+        if (redraw && scene) paintCard(scene, 1, wish, nowS());
+      }
+      async function play() {
+        if (playing) {
+          stopCard(true);
+          return;
+        }
+        const btn = document.getElementById('play'),
+          err = document.getElementById('err5');
+        err.textContent = '';
+        btn.disabled = true;
+        btn.textContent = 'Loading piano…';
+        try {
+          await loadPiano();
+        } catch (e) {
+          btn.disabled = false;
+          btn.textContent = '▶ Play the card';
+          err.textContent = 'The piano could not load. Please try again.';
+          return;
+        }
+        btn.disabled = false;
+        btn.textContent = '■ Stop';
+        cardToTop(cardEl);
+        const song = compose(cardText),
+          t0 = actx.currentTime + 0.25,
+          srcs = [];
+        for (const n of [...song.notes, ...song.bass, ...song.fin])
+          srcs.push(key(n.midi, t0 + n.t, n.dur, soundOn ? n.vol : 0));
+        playing = { srcs };
+        Desk.score(song, () => actx.currentTime - t0);
+        spans.forEach(s => {
+          s.classList.add('wait');
+          s.classList.remove('key');
+        });
+        wish = makeWish();
+        const tick = () => {
+          if (!playing) return;
+          const el = actx.currentTime - t0,
+            p = clamp(el / song.total);
+          wish.lit = p >= 0.97 ? Math.min(1, (p - 0.97) / 0.03) : 0;
+          paintCard(scene, p, wish, nowS());
+          for (const w of song.words) {
+            const s = spans[w.word];
+            if (!s) continue;
+            if (el >= w.t) {
+              if (s.classList.contains('wait')) {
+                emitEdge(fx, w.key ? 5 : mood === 'warm' ? 1 : 2);
+                if (w.key) s.classList.add('key');
+                followWord(s);
+              }
+              s.classList.remove('wait');
+              s.classList.toggle('now', el < w.t + 0.45);
+            }
+          }
+          if (el < song.total + 0.6) raf = requestAnimationFrame(tick);
+          else {
+            playing = null;
+            spans.forEach(s => s.classList.remove('wait', 'now'));
+            btn.textContent = '▶ Play again';
+            if (scene.flames) wish.lit = 1;
+          }
+        };
+        raf = requestAnimationFrame(tick);
+      }
+      /* sparkles keep twinkling while the card is on screen */
+      let fxLast = 0,
+        idleAcc = 0;
+      function fxLoop(now) {
+        const dt = Math.min(0.05, (now - (fxLast || now)) / 1000);
+        fxLast = now;
+        if (fx.on && document.getElementById('s5').classList.contains('on')) {
+          if (!playing) {
+            idleAcc += dt * IDLE_RATE[mood];
+            while (idleAcc >= 1) {
+              emitEdge(fx, 1);
+              idleAcc--;
+            }
+            if (scene && scene.flames && (wish.lit || (wish.blownAt >= 0 && nowS() - wish.blownAt < 3)))
+              paintCard(scene, 1, wish, nowS());
+          }
+          fxStep(fx, dt);
+        }
+        requestAnimationFrame(fxLoop);
+      }
+      requestAnimationFrame(fxLoop);
+      window.addEventListener('resize', () => {
+        if (fx.on) sizeFx(fx);
+      });
+      /* tap the candles to blow them out */
+      cv.addEventListener('click', () => {
+        if (blowCandles(wish, nowS())) {
+          for (let i = 0; i < 12; i++) setTimeout(() => emitEdge(fx, 2), i * 70);
+          chord([523.25, 659.25, 783.99, 1046.5]);
+        }
+      });
 
-/* ================= gift & PayPal (sandbox) ================= */
-const PRICE=2.99;let gift=0,paypalReady=false;
-const preview=location.protocol==='file:'||location.protocol==='content:';
-document.querySelectorAll('#gifts button').forEach(b=>b.onclick=()=>{
-  gift=Number(b.dataset.g);document.querySelectorAll('#gifts button').forEach(x=>x.classList.toggle('on',x===b));
-  updateTotal();ping(gift?783.99:523.25,.3);});
-function updateTotal(){
-  const to=val('to')||'them';
-  document.getElementById('giftAmt').textContent='$'+gift.toFixed(2);
-  document.getElementById('totalAmt').textContent='$'+(PRICE+gift).toFixed(2);
-  document.getElementById('giftNote').textContent=gift?`$${gift} travels inside the envelope — ${to} claims it with PayPal.`:'The gift travels inside the envelope.';
-}
-function cardPayload(){return{gift,card:{occasion:occ,to:val('to'),from:val('from'),text:cardText,mood,style:celestial?'celestial':'classic',ai:AI}};}
-function loadScript(src,ns){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;if(ns)s.dataset.namespace=ns;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
-async function setupPaypal(){
-  if(paypalReady)return;
-  const box=document.getElementById('paypal-buttons'),err=document.getElementById('errPay');
-  if(preview){
-    box.innerHTML='<button class="sim">Pay with PayPal<small>Preview: the payment is simulated in this file</small></button>';
-    box.querySelector('button').onclick=()=>paid('preview1234',{paid:(PRICE+gift).toFixed(2),transaction:'PREVIEW-0000'});paypalReady=true;return;
-  }
-  let step='config';
-  try{
-    const cfg=await (await fetch('/api/config')).json();
-    if(!cfg.paypalClientId)throw new Error(cfg.error||'no client id');
-    step='script';
-    await loadScript('https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(cfg.paypalClientId)+'&currency=USD&intent=capture&components=buttons','paypalSdk').catch(()=>{throw new Error('the PayPal script was blocked or failed');});
-    step='buttons';
-    const sdk=window.paypalSdk;
-    if(!sdk||!sdk.Buttons)throw new Error('PayPal loaded without buttons');
-    await sdk.Buttons({
-      style:{shape:'pill',color:'gold',label:'pay',height:46},
-      createOrder:async()=>{
-        err.textContent='';
-        const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cardPayload())});
-        const d=await r.json().catch(()=>({}));
-        if(!r.ok||!d.id){err.textContent=d.error||'The payment could not be started.';throw new Error('order');}
-        return d.id;
-      },
-      onApprove:async(data,actions)=>{
-        const r=await fetch('/api/capture',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderID:data.orderID})});
-        const d=await r.json().catch(()=>({}));
-        if(d.declined)return actions.restart();
-        if(!r.ok||!d.id){err.textContent=d.error||'The payment could not be completed.';return;}
-        paid(d.id,d);
-      },
-      onCancel:()=>{err.textContent='The payment was cancelled. Your card is still here.';},
-      onError:()=>{if(!err.textContent)err.textContent='Something went wrong with PayPal. Please try again.';}
-    }).render('#paypal-buttons');
-    paypalReady=true;
-  }catch(e){
-    console.log('PayPal setup failed at',step,e);
-    err.textContent='PayPal could not load. Please refresh the page.';
-  }
-}
+      /* ================= gift & PayPal (sandbox) ================= */
+      const PRICE = 2.99;
+      let gift = 0,
+        paypalReady = false;
+      const preview = location.protocol === 'file:' || location.protocol === 'content:';
+      document.querySelectorAll('#gifts button').forEach(
+        b =>
+          (b.onclick = () => {
+            gift = Number(b.dataset.g);
+            document.querySelectorAll('#gifts button').forEach(x => x.classList.toggle('on', x === b));
+            updateTotal();
+            ping(gift ? 783.99 : 523.25, 0.3);
+          }),
+      );
+      function updateTotal() {
+        const to = val('to') || 'them';
+        document.getElementById('giftAmt').textContent = '$' + gift.toFixed(2);
+        document.getElementById('totalAmt').textContent = '$' + (PRICE + gift).toFixed(2);
+        document.getElementById('giftNote').textContent = gift
+          ? `$${gift} travels inside the envelope — ${to} claims it with PayPal.`
+          : 'The gift travels inside the envelope.';
+      }
+      function cardPayload() {
+        return {
+          gift,
+          card: {
+            occasion: occ,
+            to: val('to'),
+            from: val('from'),
+            text: cardText,
+            mood,
+            style: celestial ? 'celestial' : 'classic',
+            ai: AI,
+          },
+        };
+      }
+      function loadScript(src, ns) {
+        return new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = src;
+          if (ns) s.dataset.namespace = ns;
+          s.onload = res;
+          s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      async function setupPaypal() {
+        if (paypalReady) return;
+        const box = document.getElementById('paypal-buttons'),
+          err = document.getElementById('errPay');
+        if (preview) {
+          box.innerHTML =
+            '<button class="sim">Pay with PayPal<small>Preview: the payment is simulated in this file</small></button>';
+          box.querySelector('button').onclick = () =>
+            paid('preview1234', { paid: (PRICE + gift).toFixed(2), transaction: 'PREVIEW-0000' });
+          paypalReady = true;
+          return;
+        }
+        let step = 'config';
+        try {
+          const cfg = await (await fetch('/api/config')).json();
+          if (!cfg.paypalClientId) throw new Error(cfg.error || 'no client id');
+          step = 'script';
+          await loadScript(
+            'https://www.paypal.com/sdk/js?client-id=' +
+              encodeURIComponent(cfg.paypalClientId) +
+              '&currency=USD&intent=capture&components=buttons',
+            'paypalSdk',
+          ).catch(() => {
+            throw new Error('the PayPal script was blocked or failed');
+          });
+          step = 'buttons';
+          const sdk = window.paypalSdk;
+          if (!sdk || !sdk.Buttons) throw new Error('PayPal loaded without buttons');
+          await sdk
+            .Buttons({
+              style: { shape: 'pill', color: 'gold', label: 'pay', height: 46 },
+              createOrder: async () => {
+                err.textContent = '';
+                const r = await fetch('/api/order', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(cardPayload()),
+                });
+                const d = await r.json().catch(() => ({}));
+                if (!r.ok || !d.id) {
+                  err.textContent = d.error || 'The payment could not be started.';
+                  throw new Error('order');
+                }
+                return d.id;
+              },
+              onApprove: async (data, actions) => {
+                const r = await fetch('/api/capture', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ orderID: data.orderID }),
+                });
+                const d = await r.json().catch(() => ({}));
+                if (d.declined) return actions.restart();
+                if (!r.ok || !d.id) {
+                  err.textContent = d.error || 'The payment could not be completed.';
+                  return;
+                }
+                paid(d.id, d);
+              },
+              onCancel: () => {
+                err.textContent = 'The payment was cancelled. Your card is still here.';
+              },
+              onError: () => {
+                if (!err.textContent) err.textContent = 'Something went wrong with PayPal. Please try again.';
+              },
+            })
+            .render('#paypal-buttons');
+          paypalReady = true;
+        } catch (e) {
+          console.log('PayPal setup failed at', step, e);
+          err.textContent = 'PayPal could not load. Please refresh the page.';
+        }
+      }
 
-/* ================= VI · send: the private link ================= */
-let cardLink='';
-function paid(id,pay){
-  cardLink=location.origin.replace(/^(file|content):.*/,'https://greetonata.pages.dev')+'/c/'+id;
-  stopCard(true);
-  const to=val('to');
-  document.getElementById('link').value=cardLink;
-  document.getElementById('doneNote').textContent=`Send this private link to ${to}. Only people who have it can open the card`+(gift?` — and the $${gift} gift waits inside the envelope.`:'.');
-  const rc=document.getElementById('receipt');rc.innerHTML='';
-  const row=(a,b,cls)=>{const d=document.createElement('div');if(cls)d.className=cls;d.append(Object.assign(document.createElement('span'),{textContent:a}),Object.assign(document.createElement('span'),{textContent:b}));rc.appendChild(d);};
-  rc.appendChild(Object.assign(document.createElement('b'),{textContent:'Paid with PayPal (sandbox)'}));
-  row('Card','$'+PRICE.toFixed(2));if(gift)row('Gift for '+to,'$'+gift.toFixed(2));
-  row('Total','$'+((pay&&pay.paid)||(PRICE+gift).toFixed(2)),'tot');
-  if(pay&&pay.transaction)rc.appendChild(Object.assign(document.createElement('small'),{textContent:'Transaction ID: '+pay.transaction}));
-  go(6);
-  const m=document.getElementById('sealMini');sizeCanvas(m,110);paint(m.getContext('2d'),scene.els,1,null);
-  chord([523.25,659.25,783.99,1046.5]);
-}
-async function copyLink(){
-  const b=document.getElementById('copyBtn');
-  try{await navigator.clipboard.writeText(cardLink);}catch(e){const i=document.getElementById('link');i.select();document.execCommand('copy');}
-  b.textContent='Copied ✓';setTimeout(()=>b.textContent='Copy link',1800);
-}
-async function shareLink(){
-  const to=val('to');
-  if(navigator.share){try{await navigator.share({title:`A card for ${to}`,text:'I made you a card that plays music.',url:cardLink});}catch(e){}}
-  else copyLink();
-}
-</script>
-</body>
+      /* ================= VI · send: the private link ================= */
+      let cardLink = '';
+      function paid(id, pay) {
+        cardLink = location.origin.replace(/^(file|content):.*/, 'https://greetonata.pages.dev') + '/c/' + id;
+        stopCard(true);
+        const to = val('to');
+        document.getElementById('link').value = cardLink;
+        document.getElementById('doneNote').textContent =
+          `Send this private link to ${to}. Only people who have it can open the card` +
+          (gift ? ` — and the $${gift} gift waits inside the envelope.` : '.');
+        const rc = document.getElementById('receipt');
+        rc.innerHTML = '';
+        const row = (a, b, cls) => {
+          const d = document.createElement('div');
+          if (cls) d.className = cls;
+          d.append(
+            Object.assign(document.createElement('span'), { textContent: a }),
+            Object.assign(document.createElement('span'), { textContent: b }),
+          );
+          rc.appendChild(d);
+        };
+        rc.appendChild(
+          Object.assign(document.createElement('b'), { textContent: 'Paid with PayPal (sandbox)' }),
+        );
+        row('Card', '$' + PRICE.toFixed(2));
+        if (gift) row('Gift for ' + to, '$' + gift.toFixed(2));
+        row('Total', '$' + ((pay && pay.paid) || (PRICE + gift).toFixed(2)), 'tot');
+        if (pay && pay.transaction)
+          rc.appendChild(
+            Object.assign(document.createElement('small'), {
+              textContent: 'Transaction ID: ' + pay.transaction,
+            }),
+          );
+        go(6);
+        const m = document.getElementById('sealMini');
+        sizeCanvas(m, 110);
+        paint(m.getContext('2d'), scene.els, 1, null);
+        chord([523.25, 659.25, 783.99, 1046.5]);
+      }
+      async function copyLink() {
+        const b = document.getElementById('copyBtn');
+        try {
+          await navigator.clipboard.writeText(cardLink);
+        } catch (e) {
+          const i = document.getElementById('link');
+          i.select();
+          document.execCommand('copy');
+        }
+        b.textContent = 'Copied ✓';
+        setTimeout(() => (b.textContent = 'Copy link'), 1800);
+      }
+      async function shareLink() {
+        const to = val('to');
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `A card for ${to}`,
+              text: 'I made you a card that plays music.',
+              url: cardLink,
+            });
+          } catch (e) {}
+        } else copyLink();
+      }
+    </script>
+  </body>
 </html>
