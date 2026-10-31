@@ -446,10 +446,10 @@ function buildCake(f,R,c,text){
   const num=cakeNumber(text||''),cT=.86;
   if(num){
     const digits=String(num).split(''),size=digits.length>2?.38:.54,gap=size*.62,x0=-(digits.length-1)*gap/2;
-    digits.forEach((dg,i)=>{const x=x0+i*gap,y=yT-size*.12;
-      els.push({k:'text',x,y,size,txt:dg,col:hsl(c.candle),stroke:hsl(c.line),t0:cT+i*.03,t1:cT+i*.03+.06});
-      els.push(L_([P(x,y-size*.7),P(x,y-size*.8)],cT+.08,cT+.1,hsl([30,20,25]),1.4));
-      flames.push({x,y:y-size*.8,s:.06});});
+    digits.forEach((dg,i)=>{const x=x0+i*gap,y=yT-size*.12,flame={x,y:y-size*.76,s:.06};
+      // the wick and the flame are placed on the real top of the digit when it is drawn (see paint)
+      els.push({k:'text',x,y,size,txt:dg,col:hsl(c.candle),stroke:hsl(c.line),t0:cT+i*.03,t1:cT+i*.03+.06,flame});
+      flames.push(flame);});
   }else{
     const n=3+code(f,31)%5;
     for(let i=0;i<n;i++){const a=Math.PI*(.15+.7*i/Math.max(1,n-1)),x=-tw/2*.62*Math.cos(a),yb=yT+ry*.5*Math.sin(a)-.01,hgt=.26+.05*(i%2),cw=.026;
@@ -838,7 +838,10 @@ function paint(ctx,els,p,mono){
       ctx.font=`700 ${e.size*u}px 'DM Sans',Arial,sans-serif`;ctx.textAlign='center';ctx.textBaseline='alphabetic';   // lining figures, so every digit has the same height
       if(mono){ctx.fillStyle=mono;ctx.globalAlpha=.85*q;ctx.fillText(e.txt,0,0);}
       else{ctx.fillStyle=e.col;ctx.fillText(e.txt,0,0);ctx.lineWidth=1.4*px;ctx.strokeStyle=e.stroke;ctx.strokeText(e.txt,0,0);}
+      const top=ctx.measureText(e.txt).actualBoundingBoxAscent||e.size*u*.7,wick=e.size*u*.07;
+      if(q>=1){ctx.strokeStyle=mono||'#4a3424';ctx.lineWidth=2*px;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(0,-top+1);ctx.lineTo(0,-top-wick);ctx.stroke();}
       ctx.restore();
+      if(e.flame)e.flame.y=(Y(e)-top-wick*.85-c)/u;
     }else{
       const k=q<1?1+.35*Math.sin(q*Math.PI):1;
       if(celestial&&!mono){ctx.globalAlpha=.25;ctx.fillStyle=e.col;ctx.beginPath();ctx.arc(X(e),Y(e),e.r*u*k*q*2,0,TAU);ctx.fill();ctx.globalAlpha=1;}

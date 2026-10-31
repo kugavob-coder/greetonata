@@ -39,6 +39,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .style-switch button{border:0;background:transparent;padding:6px 11px;font-size:12px;font-weight:600;color:var(--muted)}
 .style-switch button.on{background:var(--gold);color:var(--btn-text)}
 .icon-btn{width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--gold);font-size:16px}
+@media (max-width:350px){.brand{font-size:21px}.style-switch button{padding:6px 7px;font-size:11px}.icon-btn{width:32px;height:32px}.top-actions{gap:5px}.app{padding:0 12px 30px}}
 
 /* progress */
 .steps{display:flex;justify-content:center;gap:8px;margin:16px 0 4px}
@@ -525,6 +526,7 @@ function renderCard(){
 }
 function makeCard(){
   cardText=val('edit');mood=['warm','playful','festive'].includes(pickedMood)?pickedMood:'warm';AI=pickedAI;
+  loadPiano().catch(()=>{});   // wake the sound up inside this tap: iPhones only allow audio that starts from a tap
   go(5);renderCard();updateTotal();setupPaypal();
   setTimeout(()=>{if(!playing)play();},450);       // the card starts to play by itself
 }
