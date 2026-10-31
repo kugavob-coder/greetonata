@@ -163,7 +163,13 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
   <a class="make" href="/">Make your own card</a>
 </div>
 <script src="/js/engine.js"></script>
+<script src="/js/desk.js"></script>
 <script>
+Desk.setNotes({
+  envelope:['A sealed card','<p>Tap the wax seal. The shape pressed into it is the card\'s own flower, snowflake or heart.</p>'],
+  card:['The card plays','<p>The tune begins with <b>your name</b> and ends with <b>the sender\'s</b>: every letter becomes a note. The words light up as they are sung.</p>'],
+  gift:['A gift inside','<p>The gift is sent with <b>PayPal Payouts</b> to the email you give, once per card. In this demo it is sandbox money.</p>']});
+Desk.notes('envelope');
 let occ='birthday', mood='warm', celestial=false, cardText='', scene=null, cardData=null;
 const cv=document.getElementById('shape'),msgEl=document.getElementById('msg'),cardEl=document.getElementById('card');
 const env=document.getElementById('env'),seal=document.getElementById('seal');
@@ -244,7 +250,7 @@ async function play(){
   if(!buffers){try{await loadPiano();}catch(e){spans.forEach(s=>s.classList.remove('wait'));paint(scene.ctx,scene.els,1,null);document.getElementById('again').classList.add('show');return;}}
   const song=compose(cardText),t0=actx.currentTime+.2,srcs=[];
   for(const n of[...song.notes,...song.bass,...song.fin])srcs.push(key(n.midi,t0+n.t,n.dur,n.vol));
-  playing={srcs};
+  playing={srcs};Desk.notes('card');Desk.score(song,()=>actx.currentTime-t0);
   spans.forEach(s=>{s.classList.add('wait');s.classList.remove('now','key');});
   const tick=()=>{
     if(!playing)return;
@@ -274,7 +280,7 @@ requestAnimationFrame(fxLoop);
 /* ================= the gift ================= */
 let giftShown=false;
 function showGift(){
-  if(giftShown||!cardData.gift)return;giftShown=true;
+  if(giftShown||!cardData.gift)return;giftShown=true;Desk.notes('gift');
   const box=document.getElementById('gift');
   document.getElementById('giftTitle').textContent=`A $${cardData.gift} gift for you`;
   document.getElementById('giftFrom').textContent=cardData.giftClaimed?'This gift has already been claimed.':`from ${cardData.from}, tucked inside the envelope`;

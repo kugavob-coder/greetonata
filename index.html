@@ -68,7 +68,16 @@ h2{font:500 38px/1.02 'Cormorant Garamond',serif;text-align:center}
 .note{position:absolute;color:var(--gold);font:28px 'Cormorant Garamond',serif;animation:noteFloat 4s ease-in-out infinite}
 .n1{left:10%;top:22%}.n2{right:9%;top:34%;animation-delay:1s}.n3{left:20%;bottom:14%;animation-delay:2s}.n4{right:18%;bottom:12%;animation-delay:.6s}
 @keyframes noteFloat{50%{transform:translateY(-12px) rotate(8deg)}}
-.values{display:flex;justify-content:center;gap:28px;margin:26px 0 4px}
+.values{display:flex;justify-content:center;gap:28px;margin:22px 0 8px;padding-bottom:6px}
+.value{line-height:1.35}
+/* on a phone the whole first screen fits, nothing is cut at the bottom */
+@media (max-height:900px) and (max-width:600px){
+  .hero-art{height:240px}
+  .hero-cv{width:200px;height:200px}
+  .orbit{width:250px;height:150px}
+  .glow{width:190px;height:190px}
+  #s1 .intro{margin-top:8px}
+}
 .value{font:italic 16px 'Cormorant Garamond',serif;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
 .value b{font-size:20px;color:var(--gold);font-weight:400}
 
@@ -308,8 +317,18 @@ body.celestial .cardx{box-shadow:0 14px 34px #0007}
 
 </div>
 <script src="js/engine.js"></script>
+<script src="js/desk.js"></script>
 <script>
 /* ================= state ================= */
+Desk.setNotes({
+  s1:['I · Overture','<p>Greetonata turns a message into a one-of-a-kind card: <b>a flower drawn from its words</b> and <b>a melody composed from it</b>.</p>'],
+  s2:['II · The Occasion','<p>Each occasion has its own family of shapes: nine kinds of flowers, seven kinds of real snow crystals and a growing heart, each with its own colours.</p>'],
+  s3:['III · For Whom','<p><b>AI</b> (Llama 3.3 on Groq) writes three drafts in three tones. Your details are used only for that request.</p>'],
+  s4:['IV · The Words','<p>With each draft the AI also picks <b>the key words</b>, <b>two colours</b> and <b>an energy level</b>. You can edit the text freely.</p>'],
+  s5:['V · The Card','<p>The tune begins with <b>the recipient\'s name</b> and ends with <b>yours</b>: every letter becomes a note. Key words get longer notes and glow.</p><p>Payment uses <b>PayPal Checkout</b> (Orders API). The optional gift goes into the envelope.</p>'],
+  s6:['VI · Send','<p>The card gets <b>a private link</b> that never expires. The recipient opens a sealed envelope and claims the gift through <b>PayPal Payouts</b>.</p>']});
+Desk.notes('s1');
+
 let occ=null, celestial=false, soundOn=true, mood='warm', cardText='', scene=null;
 
 /* ================= home: a card shape drawing itself ================= */
@@ -325,7 +344,7 @@ function heroShape(){
 }
 function heroFrame(now){
   if(document.getElementById('s1').classList.contains('on')){
-    if(!heroEls){sizeCanvas(heroCv,240);heroShape();heroT0=now;heroCv.classList.remove('fade');}
+    if(!heroEls){sizeCanvas(heroCv,heroCv.clientWidth||240);heroShape();heroT0=now;heroCv.classList.remove('fade');}
     const el=(now-heroT0)/1000;
     paint(heroCv.getContext('2d'),heroEls,clamp(el/3.2),null);
     if(el>5.6&&!heroCv.classList.contains('fade'))heroCv.classList.add('fade');
@@ -412,6 +431,7 @@ function go(n){
   document.querySelectorAll('#steps i').forEach((d,i)=>d.classList.toggle('on',i===n-1));
   if(n<5)applyColors();
   if(n<6)ping([392,523.25,587.33,659.25,783.99][n-1],.3);
+  Desk.notes('s'+n);if(n!==5)Desk.idle();
   scrollTo(0,0);
 }
 const val=id=>document.getElementById(id).value.trim();
@@ -501,6 +521,7 @@ function renderCard(){
 function makeCard(){
   cardText=val('edit');mood=['warm','playful','festive'].includes(pickedMood)?pickedMood:'warm';AI=pickedAI;
   go(5);renderCard();updateTotal();setupPaypal();
+  setTimeout(()=>{if(!playing)play();},450);       // the card starts to play by itself
 }
 function stopCard(redraw){
   if(playing){playing.srcs.forEach(s=>{try{s.stop()}catch(e){}});playing=null;}
@@ -517,7 +538,7 @@ async function play(){
   btn.disabled=false;btn.textContent='■ Stop';cardToTop(cardEl);
   const song=compose(cardText),t0=actx.currentTime+.25,srcs=[];
   for(const n of[...song.notes,...song.bass,...song.fin])srcs.push(key(n.midi,t0+n.t,n.dur,soundOn?n.vol:0));
-  playing={srcs};
+  playing={srcs};Desk.score(song,()=>actx.currentTime-t0);
   spans.forEach(s=>{s.classList.add('wait');s.classList.remove('key');});
   const tick=()=>{
     if(!playing)return;
