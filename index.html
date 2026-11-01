@@ -470,6 +470,7 @@
       }
       .occ .art {
         flex: none;
+        width: calc(100% + 12px); /* Safari does not stretch this box to the card's width by itself */
         height: 120px;
         margin: 0 -6px;
         display: grid;
@@ -499,6 +500,10 @@
       }
       .occ.sel svg {
         transform: rotate(18deg) scale(1.08);
+      }
+      .occ strong,
+      .occ small {
+        width: 100%; /* Safari: full width inside the button, so the text stays centred */
       }
       .occ strong {
         display: block;
@@ -1000,7 +1005,7 @@
     <div class="demo">Demo — PayPal sandbox, no real money.</div>
     <div class="app">
       <header class="top">
-        <div class="brand">Greetonata<span> ✳</span></div>
+        <div class="brand">Greetonata<span> ✳︎</span></div>
         <div class="top-actions">
           <div class="style-switch" role="group" aria-label="Style">
             <button id="stClassic" class="on" onclick="setStyle(false)">Classic</button>
@@ -1028,7 +1033,7 @@
         <div class="values">
           <div class="value"><b>❀</b>A flower</div>
           <div class="value"><b>♫</b>A melody</div>
-          <div class="value"><b>✉</b>A keepsake</div>
+          <div class="value"><b>✉︎</b>A keepsake</div>
         </div>
       </section>
 
@@ -1513,7 +1518,7 @@
         return data.drafts;
       }
       const ORN = ['❦', '✧', '❀'],
-        WAX = ['♡', '♪', '✳'];
+        WAX = ['♡', '♪', '✳︎'];
       async function writeDrafts(again) {
         if (used >= ROUNDS) return;
         ['to', 'from'].forEach(id => {

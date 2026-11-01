@@ -310,9 +310,12 @@ const V3 = {
 };
 
 /* the tune begins with their name and ends with yours:
-   Each letter of a name becomes a note (a, h, o, v → do; b, i, p, w → re; …), like Bach spelling
-   B-A-C-H in notes. The rhythm stays from a hand-written phrase, and notes on strong beats are
-   moved to the nearest chord tone, so the name always sounds like part of a song. */
+   Each letter of a name becomes one note: a musical cipher in the spirit of Bach's B-A-C-H.
+   The 26 letters share the seven notes of the scale (see LETTER below):
+     do: a z · re: b k n u · mi: c e l · fa: d f p r · sol: g i t v · la: h m o w · ti: j q s x y
+   The rhythm stays from a hand-written phrase. Each note takes the octave closest to the note
+   before it, notes on strong beats are moved to the nearest chord tone, and the same note never
+   comes three times in a row, so the name always sounds like part of a song. */
 const CHORD_DEG = { I: [0, 2, 4], IV: [3, 5, 0], V: [4, 6, 1] };
 const TITLES = /^(mr|mrs|ms|miss|dr|mx|sir|madam)$/i;
 function nameLetters(s) {
